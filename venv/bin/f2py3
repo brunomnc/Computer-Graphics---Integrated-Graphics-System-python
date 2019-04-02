@@ -1,4 +1,5 @@
 #!/home/bruno/Projects/SGI-python/venv/bin/python
+
 # -*- coding: utf-8 -*-
 import re
 import sys
