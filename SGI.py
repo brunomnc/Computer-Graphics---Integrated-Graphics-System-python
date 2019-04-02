@@ -14,127 +14,12 @@ listaPoligonos = []
 surface = None
 
 MainWindow = None
+store = Gtk.ListStore(str, str, float)
 
 
 class Handler:
     def onDestroy(self, *args):
         Gtk.main_quit()
-
-SIZE = 10
-
-
-def triangle(ctx):
-    ctx.move_to(SIZE, 0)
-    ctx.rel_line_to(SIZE, 2 * SIZE)
-    ctx.rel_line_to(-2 * SIZE, 0)
-    ctx.close_path()
-
-
-def square(ctx):
-    ctx.move_to(0, 0)
-    ctx.rel_line_to(2 * SIZE, 0)
-    ctx.rel_line_to(0, 2 * SIZE)
-    ctx.rel_line_to(-2 * SIZE, 0)
-    ctx.close_path()
-
-
-def bowtie(ctx):
-    ctx.move_to(0, 0)
-    ctx.rel_line_to(2 * SIZE, 2 * SIZE)
-    ctx.rel_line_to(-2 * SIZE, 0)
-    ctx.rel_line_to(2 * SIZE, -2 * SIZE)
-    ctx.close_path()
-
-
-def inf(ctx):
-    ctx.move_to(0, SIZE)
-    ctx.rel_curve_to(0, SIZE, SIZE, SIZE, 2 * SIZE, 0)
-    ctx.rel_curve_to(SIZE, -SIZE, 2 * SIZE, -SIZE, 2 * SIZE, 0)
-    ctx.rel_curve_to(0, SIZE, -SIZE, SIZE, - 2 * SIZE, 0)
-    ctx.rel_curve_to(-SIZE, -SIZE, - 2 * SIZE, -SIZE, - 2 * SIZE, 0)
-    ctx.close_path()
-
-
-def draw_shapes(ctx, x, y, fill):
-    ctx.save()
-
-    ctx.new_path()
-    ctx.translate(x + SIZE, y + SIZE)
-    bowtie(ctx)
-    if fill:
-        ctx.fill()
-    else:
-        ctx.stroke()
-
-    ctx.new_path()
-    ctx.translate(3 * SIZE, 0)
-    square(ctx)
-    if fill:
-        ctx.fill()
-    else:
-        ctx.stroke()
-
-    ctx.new_path()
-    ctx.translate(3 * SIZE, 0)
-    triangle(ctx)
-    if fill:
-        ctx.fill()
-    else:
-        ctx.stroke()
-
-    ctx.new_path()
-    ctx.translate(3 * SIZE, 0)
-    inf(ctx)
-    if fill:
-        ctx.fill()
-    else:
-        ctx.stroke()
-
-    ctx.restore()
-
-def fill_shapes(ctx, x, y):
-    draw_shapes(ctx, x, y, True)
-
-
-def stroke_shapes(ctx, x, y):
-    draw_shapes(ctx, x, y, False)
-
-
-def draw(da, ctx):
-
-    ctx.set_source_rgb(0, 0, 0)
-    # ctx.scale(500, 500)
-
-    larguraLinha = 2
-
-    ctx.set_line_width(larguraLinha)
-    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-    #ctx.set_tolerance(0.1)
-
-    x, y = 100, 100
-    ctx.move_to(x, y)
-    ctx.line_to(x, y)
-    ctx.stroke_preserve()
-
-    ctx.set_line_join(cairo.LINE_JOIN_ROUND)
-    ctx.set_dash([SIZE / 4.0, SIZE / 4.0], 0)
-    stroke_shapes(ctx, 0, 0)
-
-    ctx.set_dash([], 0)
-    stroke_shapes(ctx, 0, 3 * SIZE)
-
-    ctx.set_line_join(cairo.LINE_JOIN_BEVEL)
-    stroke_shapes(ctx, 0, 6 * SIZE)
-
-    ctx.set_line_join(cairo.LINE_JOIN_MITER)
-    stroke_shapes(ctx, 0, 9 * SIZE)
-
-    fill_shapes(ctx, 0, 12 * SIZE)
-
-    ctx.set_line_join(cairo.LINE_JOIN_BEVEL)
-    fill_shapes(ctx, 0, 15 * SIZE)
-    ctx.set_source_rgb(1, 0, 0)
-    stroke_shapes(ctx, 0, 15 * SIZE)
 
 def desenhaPonto(ponto):
     ctx = cairo.Context(surface)
@@ -144,8 +29,7 @@ def desenhaPonto(ponto):
     ctx.move_to(ponto.x, ponto.y)
     ctx.line_to(ponto.x, ponto.y)
     ctx.stroke()
-    Gtk.Widget.queue_draw(MainWindow)
-
+    ctx.save()
 
 def clear_surface():
     cr = cairo.Context(surface)
@@ -200,6 +84,12 @@ class MainWindow(Gtk.Window):
         self.DrawingFrame = builder.get_object("DrawingFrame")
 
         self.objectTreeView = builder.get_object("objectTreeView")
+        self.objectsListStore = Gtk.ListStore(str, str, float)
+        self.objectsCellRenderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Nome", self.objectsCellRenderer, text=0)
+        column = Gtk.TreeViewColumn("Tipo", self.objectsCellRenderer, text=0)
+        self.objectTreeView.append_column(column)
+
 
         self.btnPonto = builder.get_object("btnPonto")
         self.btnReta = builder.get_object("btnReta")
@@ -271,7 +161,7 @@ class MainWindow(Gtk.Window):
         self.PontoWindow.hide()
 
     def onBtnCancelaPontoClicked(self, button):
-        self.PontoWindow.destroy()
+        self.PontoWindow.hide()
 
     def onBtnRetaClicked(self, button):
         self.RetaWindow.show_all()
