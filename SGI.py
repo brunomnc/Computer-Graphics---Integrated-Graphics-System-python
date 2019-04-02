@@ -14,7 +14,7 @@ listaPoligonos = []
 surface = None
 
 MainWindow = None
-store = Gtk.ListStore(str, str, float)
+store = Gtk.ListStore(str, str)
 
 
 class Handler:
@@ -69,6 +69,8 @@ def draw_cb(wid,cr):
 class MainWindow(Gtk.Window):
 
     def __init__(self):
+        p = Ponto(50, 50, 'q')
+        q = Ponto(10, 10, 'r')
 
         builder = Gtk.Builder()
         builder.add_from_file("view.glade")
@@ -84,12 +86,18 @@ class MainWindow(Gtk.Window):
         self.DrawingFrame = builder.get_object("DrawingFrame")
 
         self.objectTreeView = builder.get_object("objectTreeView")
-        self.objectsListStore = Gtk.ListStore(str, str, float)
+        self.objectTreeView.set_model(store)
+
         self.objectsCellRenderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn("Nome", self.objectsCellRenderer, text=0)
-        column = Gtk.TreeViewColumn("Tipo", self.objectsCellRenderer, text=0)
+        self.objectTreeView.append_column(column)
+        column = Gtk.TreeViewColumn("Tipo", self.objectsCellRenderer, text=1)
         self.objectTreeView.append_column(column)
 
+        self.objectTreeView.get_selection()
+
+        store.append(p.get_attributes())
+        store.append(q.get_attributes())
 
         self.btnPonto = builder.get_object("btnPonto")
         self.btnReta = builder.get_object("btnReta")
@@ -168,9 +176,6 @@ class MainWindow(Gtk.Window):
 
     def onBtnPoligonoClicked(self, button):
         self.PoligonoWindow.show_all()
-
-
-
 
 
 win = MainWindow()

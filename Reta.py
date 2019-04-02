@@ -1,4 +1,4 @@
-class Reta:
+class Reta(object):
     def __init__(self, _x1, _y1, _x2, _y2, _nome):
         self.x1 = _x1
         self.y1 = _y1
