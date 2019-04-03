@@ -4,6 +4,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 import array
 from Ponto import Ponto
+from Window import Window
 import Reta
 import Poligono
 
@@ -11,25 +12,58 @@ listaPontos = []
 listaRetas = []
 listaPoligonos = []
 
+xViewPortMax = 500
+xViewPortMin = 0
+yViewPortMax = 500
+yViewPortMin = 0
+
 surface = None
 
 MainWindow = None
 store = Gtk.ListStore(str, str)
+
+tela = Window(xViewPortMin, yViewPortMin, xViewPortMax, yViewPortMax)
 
 
 class Handler:
     def onDestroy(self, *args):
         Gtk.main_quit()
 
+def transformadaViewPortCoordenadaX(x):
+    auxiliar = (x - tela.getXMin()) / (tela.getXMax() - tela.getXMin())
+
+    return auxiliar * (xViewPortMax - xViewPortMin)
+
+
+def transformadaViewPortCoordenadaY(y):
+    auxiliar = (y - tela.getYMin()) / (tela.getYMax() - tela.getYMin())
+
+    return (1 - auxiliar) * (yViewPortMax - yViewPortMin)
+
+
+def atualizarTela():
+    clear_surface()
+    redesenhaPontos()
+    #redesenhaRetas()
+    #redesenhaPoligonos()
+
+
+def redesenhaPontos():
+    for ponto in listaPontos:
+        desenhaPonto(ponto)
+
+
 def desenhaPonto(ponto):
     ctx = cairo.Context(surface)
-    # ctx.set_source_rgb(0, 0, 0)
+    ctx.save()
     ctx.set_line_width(5)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-    ctx.move_to(ponto.x, ponto.y)
-    ctx.line_to(ponto.x, ponto.y)
+    ctx.move_to(transformadaViewPortCoordenadaX(ponto.x), transformadaViewPortCoordenadaY(ponto.y))
+    ctx.line_to(transformadaViewPortCoordenadaX(ponto.x), transformadaViewPortCoordenadaY(ponto.y))
     ctx.stroke()
-    ctx.save()
+    ctx.restore()
+
+
 
 def clear_surface():
     cr = cairo.Context(surface)
@@ -142,9 +176,11 @@ class MainWindow(Gtk.Window):
         self.mensagemTituloAviso = builder.get_object("mensagemTituloAviso")
         self.mensagemAviso = builder.get_object("mensagemAviso")
 
+        #conexão botões com suas funções
         self.btnPonto.connect("clicked", self.onBtnPontoClicked)
         self.btnSalvarPonto.connect("clicked", self.onBtnSalvarPontoClicked)
         self.btnCancelaPonto.connect("clicked", self.onBtnCancelaPontoClicked)
+        self.btnDown.connect("clicked", self.onBtnDownClicked)
 
         self.DrawingFrame.connect('draw', draw_cb)
         self.DrawingFrame.connect('configure-event', configure_event_cb)
@@ -176,6 +212,20 @@ class MainWindow(Gtk.Window):
 
     def onBtnPoligonoClicked(self, button):
         self.PoligonoWindow.show_all()
+
+    def onBtnDownClicked(self, button):
+        xMaximo = tela.getXMax()
+        xMinimo = tela.getXMin()
+        yMaximo = tela.getYMax()
+        yMinimo = tela.getYMin()
+
+        yMaximo -= 10
+        yMinimo -= 10
+
+        tela.setCoordenadasMaximo(xMaximo, yMaximo)
+        tela.setCoordenadasMinimo(xMinimo, yMinimo)
+
+        atualizarTela()
 
 
 win = MainWindow()
