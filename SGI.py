@@ -2,6 +2,7 @@ import cairo
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
+from gi.repository import GLib
 import array
 from Ponto import Ponto
 from Window import Window
@@ -18,7 +19,9 @@ yViewPortMax = 500
 yViewPortMin = 0
 
 surface = None
+widget = None
 
+DrawingFrame = None
 MainWindow = None
 store = Gtk.ListStore(str, str)
 
@@ -46,23 +49,24 @@ def atualizarTela():
     redesenhaPontos()
     #redesenhaRetas()
     #redesenhaPoligonos()
+    # atualiza widget do DrawingFrame
+    widget.queue_draw()
 
 
 def redesenhaPontos():
     for ponto in listaPontos:
-        desenhaPonto(ponto)
+        desenhaPontoReta(ponto, ponto)
 
 
-def desenhaPonto(ponto):
+def desenhaPontoReta(ponto_ini, ponto_fim):
     ctx = cairo.Context(surface)
     ctx.save()
     ctx.set_line_width(5)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-    ctx.move_to(transformadaViewPortCoordenadaX(ponto.x), transformadaViewPortCoordenadaY(ponto.y))
-    ctx.line_to(transformadaViewPortCoordenadaX(ponto.x), transformadaViewPortCoordenadaY(ponto.y))
+    ctx.move_to(transformadaViewPortCoordenadaX(ponto_ini.x), transformadaViewPortCoordenadaY(ponto_ini.y))
+    ctx.line_to(transformadaViewPortCoordenadaX(ponto_fim.x), transformadaViewPortCoordenadaY(ponto_fim.y))
     ctx.stroke()
     ctx.restore()
-
 
 
 def clear_surface():
@@ -94,6 +98,8 @@ def configure_event_cb(wid,evt):
 
 def draw_cb(wid,cr):
     global surface
+    global widget
+    widget = wid
 
     cr.set_source_surface(surface,0,0)
     cr.paint()
@@ -191,6 +197,7 @@ class MainWindow(Gtk.Window):
         MainWindow.show_all()
         Gtk.main()
 
+
     def onBtnPontoClicked(self, button):
         self.PontoWindow.show_all()
 
@@ -201,7 +208,7 @@ class MainWindow(Gtk.Window):
 
         ponto = Ponto(x, y, nome)
         listaPontos.append(ponto)
-        desenhaPonto(ponto)
+        desenhaPontoReta(ponto,ponto)
         self.PontoWindow.hide()
 
     def onBtnCancelaPontoClicked(self, button):

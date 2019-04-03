@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../SGI/.idea/SGI.iml" filepath="$PROJECT_DIR$/../SGI/.idea/SGI.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/SGI_py.iml" filepath="$PROJECT_DIR$/.idea/SGI_py.iml" />
     </modules>
   </component>
