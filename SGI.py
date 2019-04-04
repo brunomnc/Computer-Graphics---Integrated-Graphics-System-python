@@ -186,7 +186,15 @@ class MainWindow(Gtk.Window):
         self.btnPonto.connect("clicked", self.onBtnPontoClicked)
         self.btnSalvarPonto.connect("clicked", self.onBtnSalvarPontoClicked)
         self.btnCancelaPonto.connect("clicked", self.onBtnCancelaPontoClicked)
+
         self.btnDown.connect("clicked", self.onBtnDownClicked)
+        self.btnUp.connect("clicked", self.onBtnUpClicked)
+        self.btnLeft.connect("clicked", self.onBtnLeftClicked)
+        self.btnRight.connect("clicked", self.onBtnRightClicked)
+
+        self.btnZoomIn.connect("clicked", self.onBtnZoomInClicked)
+        self.btnZoomOut.connect("clicked", self.onBtnZoomOutClicked)
+
 
         self.DrawingFrame.connect('draw', draw_cb)
         self.DrawingFrame.connect('configure-event', configure_event_cb)
@@ -234,11 +242,84 @@ class MainWindow(Gtk.Window):
 
         atualizarTela()
 
+    def onBtnUpClicked(self, button):
+        xMaximo = tela.getXMax()
+        xMinimo = tela.getXMin()
+        yMaximo = tela.getYMax()
+        yMinimo = tela.getYMin()
+
+        yMaximo += 10
+        yMinimo += 10
+
+        tela.setCoordenadasMaximo(xMaximo, yMaximo)
+        tela.setCoordenadasMinimo(xMinimo, yMinimo)
+
+        atualizarTela()
+
+    def onBtnLeftClicked(self, button):
+        xMaximo = tela.getXMax()
+        xMinimo = tela.getXMin()
+        yMaximo = tela.getYMax()
+        yMinimo = tela.getYMin()
+
+        xMaximo -= 10
+        xMinimo -= 10
+
+        tela.setCoordenadasMaximo(xMaximo, yMaximo)
+        tela.setCoordenadasMinimo(xMinimo, yMinimo)
+
+        atualizarTela()
+
+    def onBtnRightClicked(self, button):
+        xMaximo = tela.getXMax()
+        xMinimo = tela.getXMin()
+        yMaximo = tela.getYMax()
+        yMinimo = tela.getYMin()
+
+        xMaximo += 10
+        xMinimo += 10
+
+        tela.setCoordenadasMaximo(xMaximo, yMaximo)
+        tela.setCoordenadasMinimo(xMinimo, yMinimo)
+
+        atualizarTela()
+
+    def onBtnZoomInClicked(self, button):
+        xMaximo = tela.getXMax()
+        xMinimo = tela.getXMin()
+        yMaximo = tela.getYMax()
+        yMinimo = tela.getYMin()
+
+        xMaximo -= 5
+        xMinimo += 5
+        yMaximo -= 5
+        yMinimo += 5
+
+        tela.setCoordenadasMaximo(xMaximo, yMaximo)
+        tela.setCoordenadasMinimo(xMinimo, yMinimo)
+
+        atualizarTela()
+
+    def onBtnZoomOutClicked(self, button):
+        xMaximo = tela.getXMax()
+        xMinimo = tela.getXMin()
+        yMaximo = tela.getYMax()
+        yMinimo = tela.getYMin()
+
+        xMaximo += 5
+        xMinimo -= 5
+        yMaximo += 5
+        yMinimo -= 5
+
+        tela.setCoordenadasMaximo(xMaximo, yMaximo)
+        tela.setCoordenadasMinimo(xMinimo, yMinimo)
+
+        atualizarTela()
+
 
 win = MainWindow()
 win.connect("destroy", Gtk.main_quit)
 win.show_all()
 Gtk.main()
-
 
 

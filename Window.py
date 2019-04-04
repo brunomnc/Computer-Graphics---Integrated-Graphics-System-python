@@ -6,7 +6,7 @@ class Window(object):
         self.max = Ponto(maximo_x, maximo_y, "ponto maximo")
 
     def setCoordenadasMinimo(self, x, y):
-        self.min.y = y
+        self.min.x = x
         self.min.y = y
 
 
