@@ -1,4 +1,4 @@
-class Reta(object):
+class Reta:
     def __init__(self, _x1, _y1, _x2, _y2, _nome):
         self.x1 = _x1
         self.y1 = _y1
@@ -6,18 +6,8 @@ class Reta(object):
         self.y2 = _y2
         self.nome = _nome
 
-    def get_x1(self):
-        return self.x1
+    def __str__(self):
+        return 'Reta'
 
-    def get_y1(self):
-        return self.y1
-
-    def get_x2(self):
-        return self.x2
-
-    def get_y2(self):
-        return self.y2
-
-    def get_nome(self):
-        return self.nome
-
+    def get_sttributes(self):
+        return str(self), self.nome

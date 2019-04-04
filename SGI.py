@@ -6,7 +6,7 @@ from gi.repository import GLib
 import array
 from Ponto import Ponto
 from Window import Window
-import Reta
+from Reta import Reta
 import Poligono
 
 listaPontos = []
@@ -68,6 +68,15 @@ def desenhaPontoReta(ponto_ini, ponto_fim):
     ctx.stroke()
     ctx.restore()
 
+def desenhaReta(reta):
+    ctx = cairo.Context(surface)
+    ctx.save()
+    ctx.set_line_width(5)
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.move_to(transformadaViewPortCoordenadaX(reta.x1), transformadaViewPortCoordenadaY(reta.y1))
+    ctx.line_to(transformadaViewPortCoordenadaX(reta.x2), transformadaViewPortCoordenadaY(reta.y2))
+    ctx.stroke()
+    ctx.restore()
 
 def clear_surface():
     cr = cairo.Context(surface)
@@ -182,11 +191,24 @@ class MainWindow(Gtk.Window):
         self.mensagemTituloAviso = builder.get_object("mensagemTituloAviso")
         self.mensagemAviso = builder.get_object("mensagemAviso")
 
-        #conexão botões com suas funções
+        #acao click de janelas Ponto
         self.btnPonto.connect("clicked", self.onBtnPontoClicked)
         self.btnSalvarPonto.connect("clicked", self.onBtnSalvarPontoClicked)
         self.btnCancelaPonto.connect("clicked", self.onBtnCancelaPontoClicked)
 
+        #acao click de janelas Reta
+        self.btnReta.connect("clicked", self.onBtnRetaClicked)
+        self.btnSalvarReta.connect("clicked", self.onBtnSalvarRetaClicked)
+        self.btnCancelarReta.connect("clicked", self.onBtnCancelaRetaClicked)
+
+        #acao click janela Poligono
+        self.btnPoligono.connect("clicked", self.onBtnPoligonoClicked)
+        self.btnAdicionaPontoPoligono.connect("clicked", self.onBtnAdicionaPontoPoligonoClicked)
+        self.btnSalvarPoligono.connect("clicked", self.onBtnSalvarPoligonoClicked)
+        self.btnCancelarPoligono.connect("clicked", self.onBtnCancelaPoligonoClicked)
+
+
+        #acao click janela
         self.btnDown.connect("clicked", self.onBtnDownClicked)
         self.btnUp.connect("clicked", self.onBtnUpClicked)
         self.btnLeft.connect("clicked", self.onBtnLeftClicked)
@@ -209,6 +231,9 @@ class MainWindow(Gtk.Window):
     def onBtnPontoClicked(self, button):
         self.PontoWindow.show_all()
 
+    def onBtnRetaClicked(self, button):
+        self.RetaWindow.show_all()
+
     def onBtnSalvarPontoClicked(self, button):
         x = self.btnSpinX.get_value_as_int()
         y = self.btnSpinY.get_value_as_int()
@@ -225,8 +250,32 @@ class MainWindow(Gtk.Window):
     def onBtnRetaClicked(self, button):
         self.RetaWindow.show_all()
 
+    def onBtnSalvarRetaClicked(self, button):
+        print('teste')
+        x1 = self.spinRetaX1.get_value_as_int()
+        y1 = self.spinRetaY1.get_value_as_int()
+        x2 = self.spinRetaX2.get_value_as_int()
+        y2 = self.spinRetaY2.get_value_as_int()
+        nome = self.textFieldRetaNome.get_text()
+        reta = Reta(x1, y1, x2, y2, nome)
+        listaRetas.append(reta)
+        desenhaReta(reta)
+        self.RetaWindow.hide()
+
+    def onBtnCancelaRetaClicked(self, button):
+        self.RetaWindow.hide()
+
     def onBtnPoligonoClicked(self, button):
         self.PoligonoWindow.show_all()
+
+    def onBtnAdicionaPontoPoligonoClicked(self, button):
+        pass
+
+    def onBtnSalvarPoligonoClicked(self, button):
+        self.PoligonoWindow.hide()
+
+    def onBtnCancelaPoligonoClicked(self, button):
+        self.PoligonoWindow.hide()
 
     def onBtnDownClicked(self, button):
         xMaximo = tela.getXMax()

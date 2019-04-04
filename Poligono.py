@@ -1,8 +1,9 @@
-import array
-import Ponto
+from Ponto import Ponto
+from typing import List
 
-class Poligono(object):
-    def __init__(self, _pontos:array, _nome:str):
+
+class Poligono:
+    def __init__(self, _pontos: List[Ponto], _nome: str):
         self.pontos = _pontos
         self.nome = _nome
 
@@ -11,4 +12,3 @@ class Poligono(object):
 
     def get_nome(self):
         return self.nome
-
