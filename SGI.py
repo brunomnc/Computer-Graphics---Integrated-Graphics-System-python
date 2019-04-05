@@ -12,7 +12,7 @@ from Poligono import Poligono
 
 listaPontos = []
 listaRetas = []
-listaPoligonos = []
+lista_poligonos = []
 lista_ponto_poligono = []
 
 xViewPortMax = 500
@@ -67,7 +67,7 @@ def redesenha_retas():
 
 
 def redesenha_poligonos():
-    for poligono in listaPoligonos:
+    for poligono in lista_poligonos:
         desenha_poligono(poligono)
 
 
@@ -94,7 +94,7 @@ def desenhaReta(reta):
 
 
 def desenha_poligono(poligono):
-    _ponto = poligono.at(0)
+    _ponto = poligono.pontos[0]
 
     ctx = cairo.Context(surface)
     ctx.save()
@@ -153,6 +153,7 @@ def draw_cb(wid, cr):
 class MainWindow(Gtk.Window):
 
     def __init__(self):
+
         p = Ponto(50, 50, 'q')
         q = Ponto(10, 10, 'r')
 
@@ -160,7 +161,7 @@ class MainWindow(Gtk.Window):
         listaPontos.append(q)
 
         poly = Poligono([p, q], 's')
-        listaPoligonos.append(poly)
+        # lista_poligonos.append(poly)
 
         builder = Gtk.Builder()
         builder.add_from_file("view.glade")
@@ -184,11 +185,14 @@ class MainWindow(Gtk.Window):
         column = Gtk.TreeViewColumn("Tipo", self.objectsCellRenderer, text=1)
         self.objectTreeView.append_column(column)
 
-        self.objectTreeView.get_selection()
+        #regra de selecao de objeto na lista
+        objeto_selecionado = self.objectTreeView.get_selection()
+        objeto_selecionado.connect("changed", self.on_btn_deleta_selected)
+        self.atual_selecao = None
 
         store.append(p.get_attributes())
         store.append(q.get_attributes())
-        store.append(poly.get_attributes())
+        # store.append(poly.get_attributes())
 
         self.btnPonto = builder.get_object("btnPonto")
         self.btnReta = builder.get_object("btnReta")
@@ -250,6 +254,7 @@ class MainWindow(Gtk.Window):
         self.btnCancelarPoligono.connect("clicked", self.onBtnCancelaPoligonoClicked)
 
         # acao click janela
+        self.btnDeletaItem.connect("clicked", self.on_btn_deleta_clicked)
         self.btnDown.connect("clicked", self.onBtnDownClicked)
         self.btnUp.connect("clicked", self.onBtnUpClicked)
         self.btnLeft.connect("clicked", self.onBtnLeftClicked)
@@ -277,8 +282,8 @@ class MainWindow(Gtk.Window):
         x = self.btnSpinX.get_value_as_int()
         y = self.btnSpinY.get_value_as_int()
         nome = self.textFieldNome.get_text()
-
         ponto = Ponto(x, y, nome)
+        store.append(ponto.get_attributes())
         listaPontos.append(ponto)
         desenhaPonto(ponto)
         self.PontoWindow.hide()
@@ -294,6 +299,7 @@ class MainWindow(Gtk.Window):
         y2 = self.spinRetaY2.get_value_as_int()
         nome = self.textFieldRetaNome.get_text()
         reta = Reta(x1, y1, x2, y2, nome)
+        store.append(reta.get_sttributes())
         listaRetas.append(reta)
         desenhaReta(reta)
         self.RetaWindow.hide()
@@ -311,32 +317,38 @@ class MainWindow(Gtk.Window):
         lista_ponto_poligono.append(p)
 
     def onBtnSalvarPoligonoClicked(self, button):
+        global lista_ponto_poligono
         nome = self.textFieldPoligonoName.get_text()
-        pontos = lista_ponto_poligono
-        poligono = Poligono(pontos, nome)
-        listaPoligonos.append(poligono)
+        poligono = Poligono(lista_ponto_poligono, nome)
+        store.append(poligono.get_attributes())
+        lista_poligonos.append(poligono)
         desenha_poligono(poligono)
         self.PoligonoWindow.hide()
-        lista_ponto_poligono.clear()
+        lista_ponto_poligono = []
 
     def onBtnCancelaPoligonoClicked(self, button):
         self.PoligonoWindow.hide()
 
-    def onBtnDownClicked(self, button):
-        xMaximo = tela.getXMax()
-        xMinimo = tela.getXMin()
-        yMaximo = tela.getYMax()
-        yMinimo = tela.getYMin()
+    def on_btn_deleta_selected(self, selecao):
+        model, treeiter = selecao.get_selected()
+        if treeiter is not None:
+            print("You selected", model[treeiter][0])
+            self.atual_selecao = model[treeiter][0], model[treeiter][1]
 
-        yMaximo -= 10
-        yMinimo -= 10
-
-        tela.setCoordenadasMaximo(xMaximo, yMaximo)
-        tela.setCoordenadasMinimo(xMinimo, yMinimo)
+    def on_btn_deleta_clicked(self, button):
+        if self.atual_selecao[0] == 'Ponto':
+            for p in listaPontos:
+                if self.atual_selecao[1] == p.nome:
+                    listaPontos.remove(p)
+        if self.atual_selecao[0] == 'Reta':
+            pass
+        if self.atual_selecao[0] == 'Poligono':
+            pass
 
         atualizarTela()
 
-    def onBtnUpClicked(self, button):
+
+    def onBtnDownClicked(self, button):
         xMaximo = tela.getXMax()
         xMinimo = tela.getXMin()
         yMaximo = tela.getYMax()
@@ -350,14 +362,28 @@ class MainWindow(Gtk.Window):
 
         atualizarTela()
 
+    def onBtnUpClicked(self, button):
+        xMaximo = tela.getXMax()
+        xMinimo = tela.getXMin()
+        yMaximo = tela.getYMax()
+        yMinimo = tela.getYMin()
+
+        yMaximo -= 10
+        yMinimo -= 10
+
+        tela.setCoordenadasMaximo(xMaximo, yMaximo)
+        tela.setCoordenadasMinimo(xMinimo, yMinimo)
+
+        atualizarTela()
+
     def onBtnLeftClicked(self, button):
         xMaximo = tela.getXMax()
         xMinimo = tela.getXMin()
         yMaximo = tela.getYMax()
         yMinimo = tela.getYMin()
 
-        xMaximo -= 10
-        xMinimo -= 10
+        xMaximo += 10
+        xMinimo += 10
 
         tela.setCoordenadasMaximo(xMaximo, yMaximo)
         tela.setCoordenadasMinimo(xMinimo, yMinimo)
@@ -370,8 +396,8 @@ class MainWindow(Gtk.Window):
         yMaximo = tela.getYMax()
         yMinimo = tela.getYMin()
 
-        xMaximo += 10
-        xMinimo += 10
+        xMaximo -= 10
+        xMinimo -= 10
 
         tela.setCoordenadasMaximo(xMaximo, yMaximo)
         tela.setCoordenadasMinimo(xMinimo, yMinimo)
@@ -409,81 +435,6 @@ class MainWindow(Gtk.Window):
         tela.setCoordenadasMinimo(xMinimo, yMinimo)
 
         atualizarTela()
-
-
-class Operacoes:
-    def __init__(self):
-        self.lista_pontos = []
-        self.lista_retas = []
-        self.lista_poligonos = []
-        self.lista_ponto_poligono = []
-
-    def transformadaViewPortCoordenadaX(x):
-        auxiliar = (x - tela.getXMin()) / (tela.getXMax() - tela.getXMin())
-
-        return auxiliar * (xViewPortMax - xViewPortMin)
-
-    def transformadaViewPortCoordenadaY(y):
-        auxiliar = (y - tela.getYMin()) / (tela.getYMax() - tela.getYMin())
-
-        return (1 - auxiliar) * (yViewPortMax - yViewPortMin)
-
-    def atualizarTela(self):
-        clear_surface()
-        redesenha_pontos()
-        redesenha_retas()
-        redesenha_poligonos()
-        # atualiza widget do DrawingFrame
-        widget.queue_draw()
-
-    def redesenha_pontos(self):
-        for ponto in listaPontos:
-            desenhaPonto(ponto)
-
-    def redesenha_retas(self):
-        for reta in listaRetas:
-            desenhaReta(reta)
-
-    def redesenha_poligonos(self):
-        for poligono in listaPoligonos:
-            desenha_poligono(poligono)
-
-    def desenhaPonto(self, ponto):
-        ctx = cairo.Context(surface)
-        ctx.save()
-        ctx.set_line_width(5)
-        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-        ctx.move_to(transformadaViewPortCoordenadaX(ponto.x), transformadaViewPortCoordenadaY(ponto.y))
-        ctx.line_to(transformadaViewPortCoordenadaX(ponto.x), transformadaViewPortCoordenadaY(ponto.y))
-        ctx.stroke()
-        ctx.restore()
-
-    def desenhaReta(self, reta):
-        ctx = cairo.Context(surface)
-        ctx.save()
-        ctx.set_line_width(5)
-        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-        ctx.move_to(transformadaViewPortCoordenadaX(reta.x1), transformadaViewPortCoordenadaY(reta.y1))
-        ctx.line_to(transformadaViewPortCoordenadaX(reta.x2), transformadaViewPortCoordenadaY(reta.y2))
-        ctx.stroke()
-        ctx.restore()
-
-    def desenha_poligono(self, poligono):
-        _ponto = poligono.at(0)
-
-        ctx = cairo.Context(surface)
-        ctx.save()
-        ctx.set_line_width(5)
-        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-        ctx.move_to(transformadaViewPortCoordenadaX(_ponto.x), transformadaViewPortCoordenadaY(_ponto.y))
-
-        for p in poligono.pontos:
-            ctx.line_to(transformadaViewPortCoordenadaX(p.x), transformadaViewPortCoordenadaY(p.y))
-
-        ctx.line_to(transformadaViewPortCoordenadaX(_ponto.x), transformadaViewPortCoordenadaY(_ponto.y))
-
-        ctx.stroke()
-        ctx.restore()
 
 
 win = MainWindow()
