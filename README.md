@@ -1,6 +1,6 @@
 # SGI
 
 Bibliotecas necessárias:
-*pycairo
-*pygobject
-*numpy
+* pycairo
+* pygobject
+* numpy
