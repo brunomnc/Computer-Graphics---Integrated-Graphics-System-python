@@ -11,6 +11,7 @@ from Reta import Reta
 from Poligono import Poligono
 
 listaPontos = []
+
 listaRetas = []
 lista_poligonos = []
 lista_ponto_poligono = []
@@ -186,9 +187,10 @@ class MainWindow(Gtk.Window):
         self.objectTreeView.append_column(column)
 
         #regra de selecao de objeto na lista
-        objeto_selecionado = self.objectTreeView.get_selection()
-        objeto_selecionado.connect("changed", self.on_btn_deleta_selected)
+        self.objeto_selecionado = self.objectTreeView.get_selection()
+        self.objeto_selecionado.connect("changed", self.on_btn_deleta_selected)
         self.atual_selecao = None
+        self.treeiter = None
 
         store.append(p.get_attributes())
         store.append(q.get_attributes())
@@ -336,17 +338,30 @@ class MainWindow(Gtk.Window):
             self.atual_selecao = model[treeiter][0], model[treeiter][1]
 
     def on_btn_deleta_clicked(self, button):
-        if self.atual_selecao[0] == 'Ponto':
-            for p in listaPontos:
-                if self.atual_selecao[1] == p.nome:
-                    listaPontos.remove(p)
-        if self.atual_selecao[0] == 'Reta':
-            pass
-        if self.atual_selecao[0] == 'Poligono':
-            pass
+        if len(store) != 0:
+            (model, iter) = self.objeto_selecionado.get_selected()
+            if iter is not None:
+                print("%s foi removido" % (model[iter][0]))
+                self.atualiza_objetos(model[iter])
+                store.remove(iter)
+        else:
+            print("Lista Vazia")
 
         atualizarTela()
 
+    def atualiza_objetos(self, objeto):
+        if objeto[0] == 'Ponto':
+            for p in listaPontos:
+                if objeto[1] == p.nome:
+                    listaPontos.remove(p)
+        if objeto[0] == 'Reta':
+            for p in listaRetas:
+                if objeto[1] == p.nome:
+                    listaRetas.remove(p)
+        if objeto[0] == 'Poligono':
+            for p in lista_poligonos:
+                if objeto[1] == p.nome:
+                    lista_poligonos.remove(p)
 
     def onBtnDownClicked(self, button):
         xMaximo = tela.getXMax()
