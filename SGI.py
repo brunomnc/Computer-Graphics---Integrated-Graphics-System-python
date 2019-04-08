@@ -9,6 +9,7 @@ from Ponto import Ponto
 from Window import Window
 from Reta import Reta
 from Poligono import Poligono
+import math
 
 listaPontos = []
 
@@ -157,9 +158,11 @@ class MainWindow(Gtk.Window):
 
         p = Ponto(50, 50, 'q')
         q = Ponto(10, 10, 'r')
+        r = Reta(100, 100, 300, 300, 'w')
 
         listaPontos.append(p)
         listaPontos.append(q)
+        listaRetas.append(r)
 
         poly = Poligono([p, q], 's')
         # lista_poligonos.append(poly)
@@ -186,14 +189,18 @@ class MainWindow(Gtk.Window):
         column = Gtk.TreeViewColumn("Tipo", self.objectsCellRenderer, text=1)
         self.objectTreeView.append_column(column)
 
-        #regra de selecao de objeto na lista
+        # regra de selecao de objeto na lista
         self.objeto_selecionado = self.objectTreeView.get_selection()
         self.objeto_selecionado.connect("changed", self.on_btn_deleta_selected)
         self.atual_selecao = None
         self.treeiter = None
 
+        # acao do mouse
+        self.objectTreeView.connect("button_press_event", self.mouse_click)
+
         store.append(p.get_attributes())
         store.append(q.get_attributes())
+        store.append(r.get_sttributes())
         # store.append(poly.get_attributes())
 
         self.btnPonto = builder.get_object("btnPonto")
@@ -264,6 +271,9 @@ class MainWindow(Gtk.Window):
 
         self.btnZoomIn.connect("clicked", self.onBtnZoomInClicked)
         self.btnZoomOut.connect("clicked", self.onBtnZoomOutClicked)
+
+        self.btnRotacionarEsquerda.connect("clicked", self.on_btn_rotaciona_esquerda_clicked)
+        self.btnRotacionarDireita.connect("clicked", self.on_btn_rotaciona_direita_clicked)
 
         self.DrawingFrame.connect('draw', draw_cb)
         self.DrawingFrame.connect('configure-event', configure_event_cb)
@@ -450,6 +460,120 @@ class MainWindow(Gtk.Window):
         tela.setCoordenadasMinimo(xMinimo, yMinimo)
 
         atualizarTela()
+
+    def mouse_click(self, tv, event):
+        if event.button == 3:
+            # Begin added code
+            pthinfo = self.objectTreeView.get_path_at_pos(event.x, event.y)
+            if pthinfo != None:
+                path, col, cellx, celly = pthinfo
+                self.objectTreeView.grab_focus()
+                self.objectTreeView.set_cursor(path, col, 0)
+            # End added code
+
+            selection = self.objectTreeView.get_selection()
+            (model, iter) = selection.get_selected()
+            print(model[iter][0])
+
+    def on_btn_rotaciona_esquerda_clicked(self, button):
+        if len(store) != 0:
+            (model, iter) = self.objeto_selecionado.get_selected()
+            objeto = model[iter]
+            if objeto is not None:
+                if objeto[0] == 'Ponto':
+                    # chama func rotaciona ponto
+                    for p in listaPontos:
+                        if objeto[1] == p.nome:
+                            self.rotaciona_ponto(p)
+                if objeto[0] == 'Reta':
+                    # chama func rotaciona reta
+                    for p in listaRetas:
+                        if objeto[1] == p.nome:
+                            self.rotaciona_reta_esquerda(p)
+                if objeto[0] == 'Poligono':
+                    # chama func rotaciona poligono
+                    for p in lista_poligonos:
+                        if objeto[1] == p.nome:
+                            self.rotaciona_poligono_esquerda(p)
+
+    def on_btn_rotaciona_direita_clicked(self, button):
+        if len(store) != 0:
+            (model, iter) = self.objeto_selecionado.get_selected()
+            objeto = model[iter]
+            if objeto is not None:
+                if objeto[0] == 'Ponto':
+                    # chama func rotaciona ponto
+                    for p in listaPontos:
+                        if objeto[1] == p.nome:
+                            self.rotaciona_ponto(p)
+                if objeto[0] == 'Reta':
+                    # chama func rotaciona reta
+                    for p in listaRetas:
+                        if objeto[1] == p.nome:
+                            self.rotaciona_reta_direita(p)
+                if objeto[0] == 'Poligono':
+                    # chama func rotaciona poligono
+                    for p in lista_poligonos:
+                        if objeto[1] == p.nome:
+                            self.rotaciona_poligono_direita(p)
+
+    def rotaciona_ponto(self, ponto):
+        pass
+
+    def rotaciona_reta_esquerda(self, reta):
+        theta = 10 * math.pi/180
+        x, y = reta.get_centro_gravidade()
+
+        _x1 = (reta.x1 - x) * math.cos(theta) + (reta.y1 - y) * math.sin(theta) + x
+        _y1 = (reta.x1 - x) * -math.sin(theta) + (reta.y1 - y) * math.cos(theta) + y
+        _x2 = (reta.x2 - x) * math.cos(theta) + (reta.y2 - y) * math.sin(theta) + x
+        _y2 = (reta.x2 - x) * -math.sin(theta) + (reta.y2 - y) * math.cos(theta) + y
+
+        for r in listaRetas:
+            if r == reta:
+                r.x1 = _x1
+                r.x2 = _x2
+                r.y1 = _y1
+                r.y2 = _y2
+
+        atualizarTela()
+
+    def rotaciona_reta_direita(self, reta):
+        theta = - 10 * math.pi/180
+        x, y = reta.get_centro_gravidade()
+
+        _x1 = (reta.x1 - x) * math.cos(theta) + (reta.y1 - y) * math.sin(theta) + x
+        _y1 = (reta.x1 - x) * -math.sin(theta) + (reta.y1 - y) * math.cos(theta) + y
+        _x2 = (reta.x2 - x) * math.cos(theta) + (reta.y2 - y) * math.sin(theta) + x
+        _y2 = (reta.x2 - x) * -math.sin(theta) + (reta.y2 - y) * math.cos(theta) + y
+
+        for r in listaRetas:
+            if r == reta:
+                r.x1 = _x1
+                r.x2 = _x2
+                r.y1 = _y1
+                r.y2 = _y2
+
+        atualizarTela()
+
+    def rotaciona_poligono_esquerda(self, poligono):
+        theta = 10 * math.pi/180
+        x, y = poligono.get_centro_gravidade()
+
+        for p in poligono.pontos:
+            _x = (p.x - x) * math.cos(theta) + (p.y - y) * math.sin(theta) + x
+            _y = (p.x - x) * -math.sin(theta) + (p.y - y) * math.cos(theta) + y
+            p.x = _x
+            p.y = _y
+
+        for p in lista_poligonos:
+            if p == poligono:
+                p = poligono
+
+        atualizarTela()
+
+    def rotaciona_poligono_direita(self, poligono):
+        pass
 
 
 win = MainWindow()

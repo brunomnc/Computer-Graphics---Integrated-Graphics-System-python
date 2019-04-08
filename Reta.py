@@ -11,3 +11,12 @@ class Reta:
 
     def get_sttributes(self):
         return str(self), self.nome
+
+    def get_centro_gravidade(self):
+        return (self.x1 + self.x2) / 2, (self.y1 + self.y2) / 2
+
+    def __eq__(self, other):
+        if self.x1 == other.x1 and self.x2 == other.x2 and self.y1 == other.y1 and self.y2 == other.y2 and self.nome == other.nome:
+            return True
+        else:
+            return False
