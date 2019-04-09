@@ -158,17 +158,19 @@ class MainWindow(Gtk.Window):
 
         p = Ponto(50, 50, 'q')
         q = Ponto(10, 10, 'r')
+        s = Ponto(70, 90, 'r')
         r = Reta(100, 100, 300, 300, 'w')
 
         listaPontos.append(p)
         listaPontos.append(q)
         listaRetas.append(r)
 
-        poly = Poligono([p, q], 's')
-        # lista_poligonos.append(poly)
+        poly = Poligono([p, q, s], 's')
+        lista_poligonos.append(poly)
 
         builder = Gtk.Builder()
         builder.add_from_file("view.glade")
+        builder.connect_signals(self)
 
         # carregando elementos
         MainWindow = builder.get_object("MainWindow")
@@ -179,6 +181,7 @@ class MainWindow(Gtk.Window):
         self.ExclusaoWindow = builder.get_object("ExclusaoWindow")
         self.AlertaWindow = builder.get_object("AlertaWindow")
         self.DrawingFrame = builder.get_object("DrawingFrame")
+        self.EditarWindow = builder.get_object("WindowEditarObjeto")
 
         self.objectTreeView = builder.get_object("objectTreeView")
         self.objectTreeView.set_model(store)
@@ -201,8 +204,9 @@ class MainWindow(Gtk.Window):
         store.append(p.get_attributes())
         store.append(q.get_attributes())
         store.append(r.get_sttributes())
-        # store.append(poly.get_attributes())
+        store.append(poly.get_attributes())
 
+        #botoes janela MainWindow
         self.btnPonto = builder.get_object("btnPonto")
         self.btnReta = builder.get_object("btnReta")
         self.btnPoligono = builder.get_object("btnPoligono")
@@ -215,14 +219,20 @@ class MainWindow(Gtk.Window):
         self.btnLimpaTela = builder.get_object("btnLimpaTela")
         self.btnRotacionarDireita = builder.get_object("btnRotacionarDireita")
         self.btnRotacionarEsquerda = builder.get_object("btnRotacionarEsquerda")
+        #??????????
+        self.radioRotacionarObjeto = builder.get_object("radioRotacionarCentroObj")
+        self.radioRotacionarMundo = builder.get_object("radioRotacionarCentroMundo")
+
         self.btnDeletaItem = builder.get_object("btnDeletaItem")
 
+        #botoes janela novo ponto
         self.btnSalvarPonto = builder.get_object("btnSalvarPonto")
         self.btnCancelaPonto = builder.get_object("btnCancelaPonto")
         self.btnSpinX = builder.get_object("btnSpinX")
         self.btnSpinY = builder.get_object("btnSpinY")
         self.textFieldNome = builder.get_object("textFieldNome")
 
+        #botoes janela nova reta
         self.btnSalvarReta = builder.get_object("btnSalvarReta")
         self.btnCancelarReta = builder.get_object("btnCancelarReta")
         self.spinRetaX1 = builder.get_object("spinRetaX1")
@@ -234,6 +244,7 @@ class MainWindow(Gtk.Window):
         self.btnConfirmaExclusao = builder.get_object("btnConfirmaExclusao")
         self.btnCancelaExclusao = builder.get_object("btnCancelaExclusao")
 
+        #botoes janela novo poligono
         self.poligonoX = builder.get_object("poligonoX")
         self.poligonoY = builder.get_object("poligonoY")
         self.poligonoZ = builder.get_object("poligonoZ")
@@ -242,9 +253,19 @@ class MainWindow(Gtk.Window):
         self.textFieldPoligonoName = builder.get_object("textFieldPoligonoName")
         self.btnAdicionaPontoPoligono = builder.get_object("btnAdicionaPontoPoligono")
 
+        #botoes janela alerta
         self.btnWindowAlerta = builder.get_object("btnWindowAlerta")
         self.mensagemTituloAviso = builder.get_object("mensagemTituloAviso")
         self.mensagemAviso = builder.get_object("mensagemAviso")
+
+        #botoes janela edicao
+        self.buttonSalvarEdicao = builder.get_object("buttonSalvarEdicao")
+        self.buttonCancelarEdicao = builder.get_object("buttonCancelarEdicao")
+        self.radioTransladar = builder.get_object("radioTransladar")
+        self.radioEscalonar = builder.get_object("radioEscalonar")
+        self.textFieldEditarX = builder.get_object("textFieldEditarX")
+        self.textFieldEditarY = builder.get_object("textFieldEditarY")
+        self.textFieldEditarEscalonar = builder.get_object("textFieldEditarEscalonar")
 
         # acao click de janelas Ponto
         self.btnPonto.connect("clicked", self.onBtnPontoClicked)
@@ -262,7 +283,7 @@ class MainWindow(Gtk.Window):
         self.btnSalvarPoligono.connect("clicked", self.onBtnSalvarPoligonoClicked)
         self.btnCancelarPoligono.connect("clicked", self.onBtnCancelaPoligonoClicked)
 
-        # acao click janela
+        # acao click janela principal
         self.btnDeletaItem.connect("clicked", self.on_btn_deleta_clicked)
         self.btnDown.connect("clicked", self.onBtnDownClicked)
         self.btnUp.connect("clicked", self.onBtnUpClicked)
@@ -275,6 +296,10 @@ class MainWindow(Gtk.Window):
         self.btnRotacionarEsquerda.connect("clicked", self.on_btn_rotaciona_esquerda_clicked)
         self.btnRotacionarDireita.connect("clicked", self.on_btn_rotaciona_direita_clicked)
 
+        # self.radioRotacionarObjeto.connect("toggled", self.on_editable_toggled)
+        self.buttonSalvarEdicao.connect("clicked", self.on_btn_salvar_edicao_clicked)
+        self.buttonCancelarEdicao.connect("clicked", self.on_btn_cancelar_edicao_clicked)
+
         self.DrawingFrame.connect('draw', draw_cb)
         self.DrawingFrame.connect('configure-event', configure_event_cb)
 
@@ -283,6 +308,48 @@ class MainWindow(Gtk.Window):
         # exibe tela inicial SGI
         MainWindow.show_all()
         Gtk.main()
+
+    def on_editable_toggled(self, button):
+        value = button.get_active()
+        print(value)
+
+    def on_btn_cancelar_edicao_clicked(self, button):
+        self.EditarWindow.hide()
+
+    def on_btn_salvar_edicao_clicked(self, button):
+        model = self.objeto_selecionado[0]
+        iter = self.objeto_selecionado[1]
+        objeto = model[iter]
+        #escalonar
+        if self.radioEscalonar.get_active() == True:
+            if objeto[0] == 'Ponto':
+                for p in listaPontos:
+                    if objeto[1] == p.nome:
+                        print(p)
+            if objeto[0] == 'Reta':
+                for p in listaRetas:
+                    if objeto[1] == p.nome:
+                        print(p)
+            if objeto[0] == 'Poligono':
+                for p in lista_poligonos:
+                    if objeto[1] == p.nome:
+                        print(p)
+        #transladar
+        else :
+            if objeto[0] == 'Ponto':
+                for p in listaPontos:
+                    if objeto[1] == p.nome:
+                        self.transladar_ponto(p)
+            if objeto[0] == 'Reta':
+                for p in listaRetas:
+                    if objeto[1] == p.nome:
+                        self.translatar_reta(p)
+            if objeto[0] == 'Poligono':
+                for p in lista_poligonos:
+                    if objeto[1] == p.nome:
+                        self.transladar_poligono(p)
+
+        self.EditarWindow.hide()
 
     def onBtnPontoClicked(self, button):
         self.PontoWindow.show_all()
@@ -345,11 +412,11 @@ class MainWindow(Gtk.Window):
         model, treeiter = selecao.get_selected()
         if treeiter is not None:
             print("You selected", model[treeiter][0])
-            self.atual_selecao = model[treeiter][0], model[treeiter][1]
+            self.atual_selecao = model, treeiter
 
     def on_btn_deleta_clicked(self, button):
         if len(store) != 0:
-            (model, iter) = self.objeto_selecionado.get_selected()
+            (model, iter) = self.atual_selecao
             if iter is not None:
                 print("%s foi removido" % (model[iter][0]))
                 self.atualiza_objetos(model[iter])
@@ -473,11 +540,14 @@ class MainWindow(Gtk.Window):
 
             selection = self.objectTreeView.get_selection()
             (model, iter) = selection.get_selected()
-            print(model[iter][0])
+            self.objeto_selecionado = (model, iter)
+            #dispara window
+            self.EditarWindow.show_all()
+
 
     def on_btn_rotaciona_esquerda_clicked(self, button):
         if len(store) != 0:
-            (model, iter) = self.objeto_selecionado.get_selected()
+            (model, iter) = self.atual_selecao
             objeto = model[iter]
             if objeto is not None:
                 if objeto[0] == 'Ponto':
@@ -498,7 +568,7 @@ class MainWindow(Gtk.Window):
 
     def on_btn_rotaciona_direita_clicked(self, button):
         if len(store) != 0:
-            (model, iter) = self.objeto_selecionado.get_selected()
+            (model, iter) = self.atual_selecao
             objeto = model[iter]
             if objeto is not None:
                 if objeto[0] == 'Ponto':
@@ -522,7 +592,11 @@ class MainWindow(Gtk.Window):
 
     def rotaciona_reta_esquerda(self, reta):
         theta = 10 * math.pi/180
-        x, y = reta.get_centro_gravidade()
+
+        if self.radioRotacionarObjeto.get_active() == True:
+            x, y = reta.get_centro_gravidade()
+        else:
+            x, y = 0, 0
 
         _x1 = (reta.x1 - x) * math.cos(theta) + (reta.y1 - y) * math.sin(theta) + x
         _y1 = (reta.x1 - x) * -math.sin(theta) + (reta.y1 - y) * math.cos(theta) + y
@@ -540,7 +614,11 @@ class MainWindow(Gtk.Window):
 
     def rotaciona_reta_direita(self, reta):
         theta = - 10 * math.pi/180
-        x, y = reta.get_centro_gravidade()
+
+        if self.radioRotacionarObjeto.get_active() == True:
+            x, y = reta.get_centro_gravidade()
+        else:
+            x, y = 0, 0
 
         _x1 = (reta.x1 - x) * math.cos(theta) + (reta.y1 - y) * math.sin(theta) + x
         _y1 = (reta.x1 - x) * -math.sin(theta) + (reta.y1 - y) * math.cos(theta) + y
@@ -558,7 +636,11 @@ class MainWindow(Gtk.Window):
 
     def rotaciona_poligono_esquerda(self, poligono):
         theta = 10 * math.pi/180
-        x, y = poligono.get_centro_gravidade()
+
+        if self.radioRotacionarObjeto.get_active() == True:
+            x, y = poligono.get_centro_gravidade()
+        else:
+            x, y = 0, 0
 
         for p in poligono.pontos:
             _x = (p.x - x) * math.cos(theta) + (p.y - y) * math.sin(theta) + x
@@ -573,8 +655,66 @@ class MainWindow(Gtk.Window):
         atualizarTela()
 
     def rotaciona_poligono_direita(self, poligono):
-        pass
+        theta = - 10 * math.pi / 180
 
+        if self.radioRotacionarObjeto.get_active() == True:
+            x, y = poligono.get_centro_gravidade()
+        else:
+            x, y = 0, 0
+
+        for p in poligono.pontos:
+            _x = (p.x - x) * math.cos(theta) + (p.y - y) * math.sin(theta) + x
+            _y = (p.x - x) * -math.sin(theta) + (p.y - y) * math.cos(theta) + y
+            p.x = _x
+            p.y = _y
+
+        for p in lista_poligonos:
+            if p == poligono:
+                p = poligono
+
+        atualizarTela()
+
+    def transladar_ponto(self, ponto):
+        x = int(self.textFieldEditarX.get_text())
+        y = int(self.textFieldEditarY.get_text())
+
+        ponto.x = ponto.x + x
+        ponto.y = ponto.y + y
+
+        for p in listaPontos:
+            if p == ponto:
+                p = ponto
+
+        atualizarTela()
+
+    def translatar_reta(self, reta):
+        x = int(self.textFieldEditarX.get_text())
+        y = int(self.textFieldEditarY.get_text())
+
+        reta.x1 = reta.x1 + x
+        reta.x2 = reta.x2 + x
+        reta.y1 = reta.y1 + y
+        reta.y2 = reta.y2 + y
+
+        for p in listaRetas:
+            if p == reta:
+                p = reta
+
+        atualizarTela()
+
+    def transladar_poligono(self, poligono):
+        x = int(self.textFieldEditarX.get_text())
+        y = int(self.textFieldEditarY.get_text())
+
+        for p in poligono.pontos:
+            p.x = p.x + x
+            p.y = p.y + y
+
+        for p in lista_poligonos:
+            if p == poligono:
+                p = poligono
+
+        atualizarTela()
 
 win = MainWindow()
 win.connect("destroy", Gtk.main_quit)
