@@ -11,6 +11,10 @@ class Poligono:
         return str(self), self.nome
 
     def __str__(self):
+        if len(self.pontos) == 1:
+            return 'Ponto'
+        if len(self.pontos) == 2:
+            return 'Reta'
         return 'Poligono'
 
     def at(self, index: int):

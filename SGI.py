@@ -10,6 +10,7 @@ from Window import Window
 from Reta import Reta
 from Poligono import Poligono
 import math
+from Arquivo import Arquivo
 
 listaPontos = []
 
@@ -156,17 +157,17 @@ class MainWindow(Gtk.Window):
 
     def __init__(self):
 
-        p = Ponto(50, 50, 'q')
-        q = Ponto(10, 10, 'r')
-        s = Ponto(70, 90, 'r')
-        r = Reta(100, 100, 300, 300, 'w')
-
-        listaPontos.append(p)
-        listaPontos.append(q)
-        listaRetas.append(r)
-
-        poly = Poligono([p, q, s], 's')
-        lista_poligonos.append(poly)
+        # p = Ponto(50, 50, 'q')
+        # q = Ponto(10, 10, 'r')
+        # s = Ponto(70, 90, 'r')
+        # r = Reta(100, 100, 300, 300, 'w')
+        #
+        # listaPontos.append(p)
+        # listaPontos.append(q)
+        # listaRetas.append(r)
+        #
+        # poly = Poligono([p, q, s], 's')
+        # lista_poligonos.append(poly)
 
         builder = Gtk.Builder()
         builder.add_from_file("view.glade")
@@ -201,12 +202,14 @@ class MainWindow(Gtk.Window):
         # acao do mouse
         self.objectTreeView.connect("button_press_event", self.mouse_click)
 
-        store.append(p.get_attributes())
-        store.append(q.get_attributes())
-        store.append(r.get_sttributes())
-        store.append(poly.get_attributes())
+        # store.append(p.get_attributes())
+        # store.append(q.get_attributes())
+        # store.append(r.get_sttributes())
+        # store.append(poly.get_attributes())
 
         #botoes janela MainWindow
+        self.btnAbrirArquivo = builder.get_object("btnAbrirArquivo")
+        self.btnSalvarArquivo = builder.get_object("btnSalvarArquivo")
         self.btnPonto = builder.get_object("btnPonto")
         self.btnReta = builder.get_object("btnReta")
         self.btnPoligono = builder.get_object("btnPoligono")
@@ -284,6 +287,8 @@ class MainWindow(Gtk.Window):
         self.btnCancelarPoligono.connect("clicked", self.onBtnCancelaPoligonoClicked)
 
         # acao click janela principal
+        self.btnAbrirArquivo.connect("clicked", self.on_btn_abrir_arquivo_clicked)
+        self.btnSalvarArquivo.connect("clicked", self.on_btn_salvar_arquivo_clicked)
         self.btnDeletaItem.connect("clicked", self.on_btn_deleta_clicked)
         self.btnDown.connect("clicked", self.onBtnDownClicked)
         self.btnUp.connect("clicked", self.onBtnUpClicked)
@@ -316,6 +321,20 @@ class MainWindow(Gtk.Window):
     def on_btn_cancelar_edicao_clicked(self, button):
         self.EditarWindow.hide()
 
+    def on_btn_abrir_arquivo_clicked(self, button):
+        arquivo = Arquivo('teste')
+        global lista_poligonos
+        lista_poligonos = arquivo.abrir()
+
+        for p in lista_poligonos:
+            store.append(p.get_attributes())
+
+        atualizarTela()
+
+    def on_btn_salvar_arquivo_clicked(self, button):
+        arquivo = Arquivo("teste", listaPontos, listaRetas, lista_poligonos)
+        arquivo.salvar()
+
     def on_btn_salvar_edicao_clicked(self, button):
         model = self.objeto_selecionado[0]
         iter = self.objeto_selecionado[1]
@@ -325,15 +344,15 @@ class MainWindow(Gtk.Window):
             if objeto[0] == 'Ponto':
                 for p in listaPontos:
                     if objeto[1] == p.nome:
-                        print(p)
+                        pass
             if objeto[0] == 'Reta':
                 for p in listaRetas:
                     if objeto[1] == p.nome:
-                        print(p)
+                       self.escalonar_reta(p)
             if objeto[0] == 'Poligono':
                 for p in lista_poligonos:
                     if objeto[1] == p.nome:
-                        print(p)
+                        self.escalonar_poligono(p)
         #transladar
         else :
             if objeto[0] == 'Ponto':
@@ -603,12 +622,10 @@ class MainWindow(Gtk.Window):
         _x2 = (reta.x2 - x) * math.cos(theta) + (reta.y2 - y) * math.sin(theta) + x
         _y2 = (reta.x2 - x) * -math.sin(theta) + (reta.y2 - y) * math.cos(theta) + y
 
-        for r in listaRetas:
-            if r == reta:
-                r.x1 = _x1
-                r.x2 = _x2
-                r.y1 = _y1
-                r.y2 = _y2
+        reta.x1 = _x1
+        reta.x2 = _x2
+        reta.y1 = _y1
+        reta.y2 = _y2
 
         atualizarTela()
 
@@ -625,12 +642,10 @@ class MainWindow(Gtk.Window):
         _x2 = (reta.x2 - x) * math.cos(theta) + (reta.y2 - y) * math.sin(theta) + x
         _y2 = (reta.x2 - x) * -math.sin(theta) + (reta.y2 - y) * math.cos(theta) + y
 
-        for r in listaRetas:
-            if r == reta:
-                r.x1 = _x1
-                r.x2 = _x2
-                r.y1 = _y1
-                r.y2 = _y2
+        reta.x1 = _x1
+        reta.x2 = _x2
+        reta.y1 = _y1
+        reta.y2 = _y2
 
         atualizarTela()
 
@@ -648,9 +663,6 @@ class MainWindow(Gtk.Window):
             p.x = _x
             p.y = _y
 
-        for p in lista_poligonos:
-            if p == poligono:
-                p = poligono
 
         atualizarTela()
 
@@ -713,6 +725,29 @@ class MainWindow(Gtk.Window):
         for p in lista_poligonos:
             if p == poligono:
                 p = poligono
+
+        atualizarTela()
+
+    def escalonar_reta(self, reta):
+        porcentagem = int(self.textFieldEditarEscalonar.get_text())/100
+
+        centro_reta_x, centro_reta_y = reta.get_centro_gravidade()
+
+        reta.x1 = (reta.x1 - centro_reta_x) * porcentagem + centro_reta_x
+        reta.y1 = (reta.y1 - centro_reta_y) * porcentagem + centro_reta_y
+        reta.x2 = (reta.x2 - centro_reta_x) * porcentagem + centro_reta_x
+        reta.y2 = (reta.y2 - centro_reta_y) * porcentagem + centro_reta_y
+
+        atualizarTela()
+
+    def escalonar_poligono(self, poligono):
+        porcentagem = int(self.textFieldEditarEscalonar.get_text())/100
+
+        centro_poligono_x, centro_poligono_y = poligono.get_centro_gravidade()
+
+        for p in poligono.pontos:
+            p.x = (p.x - centro_poligono_x) * porcentagem + centro_poligono_x
+            p.y = (p.y - centro_poligono_y) * porcentagem + centro_poligono_y
 
         atualizarTela()
 
