@@ -268,11 +268,6 @@
       <widget name="textFieldEditarEscalonar"/>
     </widgets>
   </object>
-  <object class="GtkSizeGroup">
-    <widgets>
-      <widget name="radioTransladar"/>
-    </widgets>
-  </object>
   <object class="GtkAdjustment" id="adjustmentCoordX1Reta">
     <property name="upper">1000</property>
     <property name="step_increment">1</property>
@@ -1032,8 +1027,8 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
     <child>
       <object class="GtkFixed" id="fixedGeral">
         <property name="name">fixedGeral</property>
-        <property name="width_request">800</property>
-        <property name="height_request">600</property>
+        <property name="width_request">1200</property>
+        <property name="height_request">800</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
@@ -1045,7 +1040,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
             <property name="can_focus">False</property>
           </object>
           <packing>
-            <property name="x">280</property>
+            <property name="x">400</property>
             <property name="y">20</property>
           </packing>
         </child>
@@ -1241,7 +1236,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">180</property>
+            <property name="y">185</property>
           </packing>
         </child>
         <child>
@@ -1254,7 +1249,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">355</property>
+            <property name="y">358</property>
           </packing>
         </child>
         <child>
@@ -1313,7 +1308,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">530</property>
+            <property name="y">528</property>
           </packing>
         </child>
         <child>
@@ -1377,7 +1372,30 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
             <property name="y">2</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkRadioButton" id="radioRotacionarWindow">
+            <property name="label" translatable="yes">Rotaciona Window</property>
+            <property name="width_request">100</property>
+            <property name="height_request">31</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+            <property name="group">radioRotacionarCentroObj</property>
+          </object>
+          <packing>
+            <property name="x">110</property>
+            <property name="y">583</property>
+          </packing>
+        </child>
       </object>
     </child>
+  </object>
+  <object class="GtkSizeGroup">
+    <widgets>
+      <widget name="radioTransladar"/>
+      <widget name="radioRotacionarWindow"/>
+    </widgets>
   </object>
 </interface>

@@ -43,6 +43,10 @@ class Arquivo:
 
     def abrir(self):
         lista_poligonos = []
+        lista_pontos = []
+        lista_retas = []
+        _temp = []
+
         lista_pontos_poligono = []
         file = open(self.nome_arquivo + self.extensao, 'r')
         conteudo = file.readlines()
@@ -51,7 +55,7 @@ class Arquivo:
                 lista_pontos_poligono = []
                 nome = str(linha.split()[1])
                 poligono = Poligono(lista_pontos_poligono, nome)
-                lista_poligonos.append(poligono)
+                _temp.append(poligono)
             else:
                 array_linha = linha.split()
                 x = int(array_linha[1])
@@ -61,7 +65,20 @@ class Arquivo:
                 poligono.pontos = lista_pontos_poligono
 
         file.close()
-        return lista_poligonos
+
+        for p in _temp:
+            if str(p) == 'Ponto':
+                ponto = Ponto(p.pontos[0].x, p.pontos[0].y, p.nome)
+                lista_pontos.append(ponto)
+            if str(p) == 'Reta':
+                reta = Reta(p.pontos[0].x, p.pontos[0].y, p.pontos[1].x, p.pontos[1].y, p.nome)
+                lista_retas.append(reta)
+            if str(p) == 'Poligono':
+                lista_poligonos.append(p)
+
+        lista_objetos = [lista_pontos, lista_retas, lista_poligonos]
+
+        return lista_objetos
 
 
 

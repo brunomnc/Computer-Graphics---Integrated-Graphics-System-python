@@ -13,7 +13,6 @@ import math
 from Arquivo import Arquivo
 
 listaPontos = []
-
 listaRetas = []
 lista_poligonos = []
 lista_ponto_poligono = []
@@ -324,10 +323,20 @@ class MainWindow(Gtk.Window):
     def on_btn_abrir_arquivo_clicked(self, button):
         arquivo = Arquivo('teste')
         global lista_poligonos
-        lista_poligonos = arquivo.abrir()
+        global listaPontos
+        global listaRetas
+        lista_objetos = arquivo.abrir()
 
-        for p in lista_poligonos:
+        listaPontos = lista_objetos[0]
+        listaRetas = lista_objetos[1]
+        lista_poligonos = lista_objetos[2]
+
+        for p in listaPontos:
             store.append(p.get_attributes())
+        for r in listaRetas:
+            store.append(r.get_sttributes())
+        for y in lista_poligonos:
+            store.append(y.get_attributes())
 
         atualizarTela()
 
@@ -615,7 +624,7 @@ class MainWindow(Gtk.Window):
         if self.radioRotacionarObjeto.get_active() == True:
             x, y = reta.get_centro_gravidade()
         else:
-            x, y = 0, 0
+            x, y = tela.get_centro()
 
         _x1 = (reta.x1 - x) * math.cos(theta) + (reta.y1 - y) * math.sin(theta) + x
         _y1 = (reta.x1 - x) * -math.sin(theta) + (reta.y1 - y) * math.cos(theta) + y
@@ -635,7 +644,7 @@ class MainWindow(Gtk.Window):
         if self.radioRotacionarObjeto.get_active() == True:
             x, y = reta.get_centro_gravidade()
         else:
-            x, y = 0, 0
+            x, y = tela.get_centro()
 
         _x1 = (reta.x1 - x) * math.cos(theta) + (reta.y1 - y) * math.sin(theta) + x
         _y1 = (reta.x1 - x) * -math.sin(theta) + (reta.y1 - y) * math.cos(theta) + y
@@ -655,7 +664,7 @@ class MainWindow(Gtk.Window):
         if self.radioRotacionarObjeto.get_active() == True:
             x, y = poligono.get_centro_gravidade()
         else:
-            x, y = 0, 0
+            x, y = tela.get_centro()
 
         for p in poligono.pontos:
             _x = (p.x - x) * math.cos(theta) + (p.y - y) * math.sin(theta) + x
@@ -672,7 +681,7 @@ class MainWindow(Gtk.Window):
         if self.radioRotacionarObjeto.get_active() == True:
             x, y = poligono.get_centro_gravidade()
         else:
-            x, y = 0, 0
+            x, y = tela.get_centro()
 
         for p in poligono.pontos:
             _x = (p.x - x) * math.cos(theta) + (p.y - y) * math.sin(theta) + x

@@ -1,5 +1,6 @@
 from Ponto import Ponto
 
+
 class Window(object):
     def __init__(self, minimo_x, minimo_y, maximo_x, maximo_y):
         self.min = Ponto(minimo_x, minimo_y, "ponto minimo")
@@ -8,7 +9,6 @@ class Window(object):
     def setCoordenadasMinimo(self, x, y):
         self.min.x = x
         self.min.y = y
-
 
     def setCoordenadasMaximo(self, x, y):
         self.max.x = x
@@ -25,3 +25,6 @@ class Window(object):
 
     def getYMax(self):
         return self.max.y
+
+    def get_centro(self):
+        return (self.min.x + self.max.x) / 2, (self.min.y + self.max.y) / 2
