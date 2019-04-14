@@ -10,4 +10,7 @@ class Ponto:
     def __str__(self):
         return 'Ponto'
 
+    def get_centro_gravidade(self):
+        return self.x, self.y
+
 
