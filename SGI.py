@@ -35,6 +35,7 @@ tela = Window(xViewPortMin, yViewPortMin, xViewPortMax, yViewPortMax)
 area_clipping = False
 liang_barsky = False
 cohen_sutherland = False
+sutherland_hodgmann = False
 
 
 class Handler:
@@ -95,18 +96,21 @@ def desenhaReta(reta):
     ctx.save()
     ctx.set_line_width(2)
     ctx.set_line_cap(cairo.LINE_CAP_SQUARE)
-    clipped = deepcopy(reta)
     if liang_barsky == True:
+        clipped = deepcopy(reta)
         lb = Clipping(tela)
         pontos = lb.liang_barsky_clipping(clipped)
-        clipped.x1 = pontos[0]
-        clipped.y1 = pontos[1]
-        clipped.x2 = pontos[2]
-        clipped.y2 = pontos[3]
-        ctx.move_to(transformadaViewPortCoordenadaX(clipped.x1), transformadaViewPortCoordenadaY(clipped.y1))
-        ctx.line_to(transformadaViewPortCoordenadaX(clipped.x2), transformadaViewPortCoordenadaY(clipped.y2))
-        ctx.stroke()
-        ctx.restore()
+        if len(pontos) == 0:
+            pass
+        else:
+            clipped.x1 = pontos[0]
+            clipped.y1 = pontos[1]
+            clipped.x2 = pontos[2]
+            clipped.y2 = pontos[3]
+            ctx.move_to(transformadaViewPortCoordenadaX(clipped.x1), transformadaViewPortCoordenadaY(clipped.y1))
+            ctx.line_to(transformadaViewPortCoordenadaX(clipped.x2), transformadaViewPortCoordenadaY(clipped.y2))
+            ctx.stroke()
+            ctx.restore()
     else:
         ctx.move_to(transformadaViewPortCoordenadaX(reta.x1), transformadaViewPortCoordenadaY(reta.y1))
         ctx.line_to(transformadaViewPortCoordenadaX(reta.x2), transformadaViewPortCoordenadaY(reta.y2))
@@ -114,21 +118,42 @@ def desenhaReta(reta):
         ctx.restore()
 
 def desenha_poligono(poligono):
-    _ponto = poligono.pontos[0]
-
     ctx = cairo.Context(surface)
     ctx.save()
     ctx.set_line_width(2)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-    ctx.move_to(transformadaViewPortCoordenadaX(_ponto.x), transformadaViewPortCoordenadaY(_ponto.y))
 
-    for p in poligono.pontos:
-        ctx.line_to(transformadaViewPortCoordenadaX(p.x), transformadaViewPortCoordenadaY(p.y))
+    if sutherland_hodgmann == True:
+        clipped = deepcopy(poligono)
+        lb = Clipping(tela)
 
-    ctx.line_to(transformadaViewPortCoordenadaX(_ponto.x), transformadaViewPortCoordenadaY(_ponto.y))
+        _pontos = lb.sutherland_hodgman_clipping(clipped)
+        if len(_pontos) == 0:
+            pass
+        else:
+            _ponto = _pontos[0]
 
-    ctx.stroke()
-    ctx.restore()
+            ctx.move_to(transformadaViewPortCoordenadaX(_ponto.x), transformadaViewPortCoordenadaY(_ponto.y))
+
+            for p in _pontos:
+                ctx.line_to(transformadaViewPortCoordenadaX(p.x), transformadaViewPortCoordenadaY(p.y))
+
+            ctx.line_to(transformadaViewPortCoordenadaX(_ponto.x), transformadaViewPortCoordenadaY(_ponto.y))
+
+            ctx.stroke()
+            ctx.restore()
+
+    else:
+        _ponto = poligono.pontos[0]
+        ctx.move_to(transformadaViewPortCoordenadaX(_ponto.x), transformadaViewPortCoordenadaY(_ponto.y))
+
+        for p in poligono.pontos:
+            ctx.line_to(transformadaViewPortCoordenadaX(p.x), transformadaViewPortCoordenadaY(p.y))
+
+        ctx.line_to(transformadaViewPortCoordenadaX(_ponto.x), transformadaViewPortCoordenadaY(_ponto.y))
+
+        ctx.stroke()
+        ctx.restore()
 
 def desenha_area_clippling():
     global area_clipping
@@ -266,6 +291,7 @@ class MainWindow(Gtk.Window):
         # switches
         self.switchAreaClipping = builder.get_object('switchAreaClipping')
         self.switchLiangBarsky = builder.get_object('switchLiangBarsky')
+        self.switchHodgmann = builder.get_object('switchHodgmann')
 
 
         self.btnDeletaItem = builder.get_object("btnDeletaItem")
@@ -349,6 +375,7 @@ class MainWindow(Gtk.Window):
 
         self.switchAreaClipping.connect('notify::active', self.on_switch_activate_clipping)
         self.switchLiangBarsky.connect('notify::active', self.on_switch_activate_liang)
+        self.switchHodgmann.connect('notify::active', self.on_switch_activate_hodgmann)
 
         self.DrawingFrame.connect('draw', draw_cb)
         self.DrawingFrame.connect('configure-event', configure_event_cb)
@@ -374,6 +401,13 @@ class MainWindow(Gtk.Window):
             liang_barsky = True
         else:
             liang_barsky = False
+
+    def on_switch_activate_hodgmann(self, switch, gparam):
+        global sutherland_hodgmann
+        if switch.get_active():
+            sutherland_hodgmann = True
+        else:
+            sutherland_hodgmann = False
 
     def on_editable_toggled(self, button):
         value = button.get_active()

@@ -1,14 +1,15 @@
 import Window as Window
 from copy import deepcopy
+from Ponto import Ponto
 
 
 class Clipping:
     def __init__(self, tela: Window):
-        self.inside = 0
-        self.left = 1
-        self.right = 2
-        self.bottom = 4
-        self.top = 8
+        self.INSIDE = 0
+        self.LEFT = 1
+        self.RIGHT = 2
+        self.BOTTOM = 4
+        self.TOP = 8
 
         self.tela = tela
 
@@ -83,24 +84,259 @@ class Clipping:
             x2 = reta.x1 + u2 * dx
             y2 = reta.y1 + u2 * dy
 
-        pontos.append(x1)
-        pontos.append(y1)
-        pontos.append(x2)
-        pontos.append(y2)
+            pontos.append(x1)
+            pontos.append(y1)
+            pontos.append(x2)
+            pontos.append(y2)
 
         return pontos
 
     def sutherland_hodgman_clipping(self, poligono):
         pontos = deepcopy(poligono.pontos)
+        _left = self.clip_left(pontos)
+        _right = self.clip_right(_left)
+        _top = self.clip_top(_right)
+        _bottom = self.clip_bottom(_top)
+
+        return _bottom
 
     def clip_left(self, pontos):
-        pass
+        clip_x = self.tela.getXMin() + self.aux
+        output = []
+
+        if len(pontos) == 0:
+            return [];
+
+        pontos.append(pontos[0])
+        sz = len(pontos) - 1
+        i = 0
+        while i < sz:
+            c_0 = pontos[i]
+            c_1 = pontos[i+1]
+
+            if c_0.x < clip_x and c_1.x < clip_x:
+                pass
+
+            if c_0.x >= clip_x and c_1.x >= clip_x:
+                output.append(c_1)
+
+            x = clip_x
+            try:
+                m = (c_1.y - c_0.y)/(c_1.x - c_0.x)
+            except:
+                m = 1
+
+            y = m * (x - c_0.x) + c_0.y
+
+            if c_0.x >= clip_x and c_1.x < clip_x:
+                p = Ponto(x, y)
+                output.append(p)
+
+            if c_0.x < clip_x and c_1.x >= clip_x:
+                p = Ponto(x, y)
+                output.append(p)
+                output.append(c_1)
+
+            i += 1
+
+        return output
 
     def clip_right(self, pontos):
-        pass
+        clip_x = self.tela.getXMax() - self.aux
+        output = []
+
+        if len(pontos) == 0:
+            return [];
+
+        pontos.append(pontos[0])
+        sz = len(pontos) - 1
+        i = 0
+        while i < sz:
+            c_0 = pontos[i]
+            c_1 = pontos[i+1]
+
+            if c_0.x >= clip_x and c_1.x >= clip_x:
+                pass
+
+            if c_0.x < clip_x and c_1.x < clip_x:
+                output.append(c_1)
+
+            x = clip_x
+
+            try:
+                m = (c_1.y - c_0.y)/(c_1.x - c_0.x)
+            except:
+                m = 1
+
+            y = m * (x - c_0.x) + c_0.y
+
+            if c_0.x < clip_x and c_1.x >= clip_x:
+                p = Ponto(x, y)
+                output.append(p)
+
+            if c_0.x >= clip_x and c_1.x < clip_x:
+                p = Ponto(x, y)
+                output.append(p)
+                output.append(c_1)
+
+            i += 1
+
+        return output
 
     def clip_top(self, pontos):
-        pass
+        clip_y = self.tela.getYMax() - self.aux
 
-    def clip_bottom(selfs, pontos):
-        pass
+        if len(pontos) == 0:
+            return [];
+
+        output = []
+        pontos.append(pontos[0])
+        sz = len(pontos) - 1
+        i = 0
+        while i < sz:
+            c_0 = pontos[i]
+            c_1 = pontos[i+1]
+
+            if c_0.y > clip_y and c_1.y > clip_y:
+                pass
+
+            if c_0.y <= clip_y and c_1.y <= clip_y:
+                output.append(c_1)
+
+            y = clip_y
+            try:
+                m = (c_1.x - c_0.x)/(c_1.y - c_0.y)
+            except:
+                m=1
+
+            x = m * (y - c_0.y) + c_0.x
+
+            if c_0.y <= clip_y and c_1.y > clip_y:
+                p = Ponto(x, y)
+                output.append(p)
+
+            if c_0.y > clip_y and c_1.y <= clip_y:
+                p = Ponto(x, y)
+                output.append(p)
+                output.append(c_1)
+
+            i += 1
+
+        return output
+
+    def clip_bottom(self, pontos):
+        clip_y = self.tela.getYMin() + self.aux
+        output = []
+
+        if len(pontos) == 0:
+            return [];
+
+        pontos.append(pontos[0])
+        sz = len(pontos) - 1
+        i = 0
+        while i < sz:
+            c_0 = pontos[i]
+            c_1 = pontos[i+1]
+
+            if c_0.y < clip_y and c_1.y < clip_y:
+                pass
+
+            if c_0.y >= clip_y and c_1.y >= clip_y:
+                output.append(c_1)
+
+            y = clip_y
+            try:
+                m = (c_1.x - c_0.x)/(c_1.y - c_0.y)
+            except:
+                m=1
+
+            x = m * (y - c_0.y) + c_0.x
+
+            if c_0.y >= clip_y and c_1.y < clip_y:
+                p = Ponto(x, y)
+                output.append(p)
+
+            if c_0.y < clip_y and c_1.y >= clip_y:
+                p = Ponto(x, y)
+                output.append(p)
+                output.append(c_1)
+
+            i += 1
+
+        return output
+
+    def buscar_codigo(self, x, y):
+        x_min = self.tela.getXMin() + self.aux
+        x_max = self.tela.getXMax() - self.aux
+        y_min = self.tela.getYMin() + self.aux
+        y_max = self.tela.getYMax() - self.aux
+
+        code = self.INSIDE
+
+        if x < x_min:
+            code |= self.LEFT
+        if x > x_max:
+            code |= self.RIGHT
+
+        if y < y_min:
+            code |= self.BOTTOM
+        if y > y_max:
+            code |= self.TOP
+
+        return code
+
+    def cohen_sutherland_clipping(self, reta):
+        x_min = self.tela.getXMin() + self.aux
+        x_max = self.tela.getXMax() - self.aux
+        y_min = self.tela.getYMin() + self.aux
+        y_max = self.tela.getYMax() - self.aux
+
+        code_0 = self.buscar_codigo(reta.x1, reta.y1)
+        code_1 = self.buscar_codigo(reta.x2, reta.y2)
+
+        aceita = False
+
+        while True:
+            if not(code_0 | code_1):
+                aceita = True
+                break
+
+            if code_0 & code_1:
+                break
+
+            else:
+                x = 0
+                y = 0
+
+                _code = None
+
+                if code_0:
+                    _code = code_0
+                else:
+                    _code = code_1
+
+                if _code & self.TOP:
+                    x = reta.x1 + (reta.x2 - reta.x1) * (y_max - reta.y1) / (reta.y2 - reta.y1)
+                    y = y_max
+
+                if _code & self.BOTTOM:
+                    x = reta.x1 + (reta.x2 - reta.x1) * (y_min - reta.y1) / (reta.y2 - reta.y1)
+                    y = y_min
+
+                if _code & self.RIGHT:
+                    x = reta.y1 + (reta.y2 - reta.y1) * (x_max - reta.x1) / (reta.x2 - reta.x1)
+                    y = x_max
+
+                if _code & self.LEFT:
+                    x = reta.y1 + (reta.y2 - reta.y1) * (x_min - reta.x1) / (reta.x2 - reta.x1)
+                    y = x_min
+
+                if _code == code_0:
+                    reta.x1 = x
+                    reta.y1 = y
+
+                    code_0 = self.buscar_codigo(reta.x1, reta.y1)
+
+                
+
+
