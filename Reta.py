@@ -20,3 +20,5 @@ class Reta:
             return True
         else:
             return False
+
+

@@ -58,8 +58,8 @@ class Arquivo:
                 _temp.append(poligono)
             else:
                 array_linha = linha.split()
-                x = int(array_linha[1])
-                y = int(array_linha[2])
+                x = float(array_linha[1])
+                y = float(array_linha[2])
                 ponto = Ponto(x, y)
                 lista_pontos_poligono.append(ponto)
                 poligono.pontos = lista_pontos_poligono

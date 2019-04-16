@@ -1,7 +1,7 @@
 from Ponto import Ponto
 
 
-class Window(object):
+class Window:
     def __init__(self, minimo_x, minimo_y, maximo_x, maximo_y):
         self.min = Ponto(minimo_x, minimo_y, "ponto minimo")
         self.max = Ponto(maximo_x, maximo_y, "ponto maximo")

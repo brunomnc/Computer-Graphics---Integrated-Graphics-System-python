@@ -11,6 +11,8 @@ from Reta import Reta
 from Poligono import Poligono
 import math
 from Arquivo import Arquivo
+from Clipping import Clipping
+from copy import deepcopy
 
 listaPontos = []
 listaRetas = []
@@ -30,6 +32,9 @@ MainWindow = None
 store = Gtk.ListStore(str, str)
 
 tela = Window(xViewPortMin, yViewPortMin, xViewPortMax, yViewPortMax)
+area_clipping = False
+liang_barsky = False
+cohen_sutherland = False
 
 
 class Handler:
@@ -54,6 +59,7 @@ def atualizarTela():
     redesenha_pontos()
     redesenha_retas()
     redesenha_poligonos()
+    desenha_area_clippling()
     # atualiza widget do DrawingFrame
     widget.queue_draw()
 
@@ -76,7 +82,7 @@ def redesenha_poligonos():
 def desenhaPonto(ponto):
     ctx = cairo.Context(surface)
     ctx.save()
-    ctx.set_line_width(5)
+    ctx.set_line_width(2)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
     ctx.move_to(transformadaViewPortCoordenadaX(ponto.x), transformadaViewPortCoordenadaY(ponto.y))
     ctx.line_to(transformadaViewPortCoordenadaX(ponto.x), transformadaViewPortCoordenadaY(ponto.y))
@@ -87,20 +93,32 @@ def desenhaPonto(ponto):
 def desenhaReta(reta):
     ctx = cairo.Context(surface)
     ctx.save()
-    ctx.set_line_width(5)
-    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-    ctx.move_to(transformadaViewPortCoordenadaX(reta.x1), transformadaViewPortCoordenadaY(reta.y1))
-    ctx.line_to(transformadaViewPortCoordenadaX(reta.x2), transformadaViewPortCoordenadaY(reta.y2))
-    ctx.stroke()
-    ctx.restore()
-
+    ctx.set_line_width(2)
+    ctx.set_line_cap(cairo.LINE_CAP_SQUARE)
+    clipped = deepcopy(reta)
+    if liang_barsky == True:
+        lb = Clipping(tela)
+        pontos = lb.liang_barsky_clipping(clipped)
+        clipped.x1 = pontos[0]
+        clipped.y1 = pontos[1]
+        clipped.x2 = pontos[2]
+        clipped.y2 = pontos[3]
+        ctx.move_to(transformadaViewPortCoordenadaX(clipped.x1), transformadaViewPortCoordenadaY(clipped.y1))
+        ctx.line_to(transformadaViewPortCoordenadaX(clipped.x2), transformadaViewPortCoordenadaY(clipped.y2))
+        ctx.stroke()
+        ctx.restore()
+    else:
+        ctx.move_to(transformadaViewPortCoordenadaX(reta.x1), transformadaViewPortCoordenadaY(reta.y1))
+        ctx.line_to(transformadaViewPortCoordenadaX(reta.x2), transformadaViewPortCoordenadaY(reta.y2))
+        ctx.stroke()
+        ctx.restore()
 
 def desenha_poligono(poligono):
     _ponto = poligono.pontos[0]
 
     ctx = cairo.Context(surface)
     ctx.save()
-    ctx.set_line_width(5)
+    ctx.set_line_width(2)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
     ctx.move_to(transformadaViewPortCoordenadaX(_ponto.x), transformadaViewPortCoordenadaY(_ponto.y))
 
@@ -111,6 +129,26 @@ def desenha_poligono(poligono):
 
     ctx.stroke()
     ctx.restore()
+
+def desenha_area_clippling():
+    global area_clipping
+    ctx = cairo.Context(surface)
+    if area_clipping == True:
+        ctx.save()
+        ctx.set_line_width(1)
+        ctx.set_source_rgb(0,0,1)
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+
+        ctx.move_to(50, 50)
+        ctx.line_to(50, 450)
+        ctx.line_to(450, 450)
+        ctx.line_to(450, 50)
+        ctx.line_to(50, 50)
+        ctx.stroke()
+        ctx.restore()
+        widget.queue_draw()
+    else:
+        pass
 
 
 def clear_surface():
@@ -221,10 +259,14 @@ class MainWindow(Gtk.Window):
         self.btnLimpaTela = builder.get_object("btnLimpaTela")
         self.btnRotacionarDireita = builder.get_object("btnRotacionarDireita")
         self.btnRotacionarEsquerda = builder.get_object("btnRotacionarEsquerda")
-        # ??????????
+        # radio buttons
         self.radioRotacionarWindow = builder.get_object("radioRotacionarWindow")
         self.radioRotacionarObjeto = builder.get_object("radioRotacionarCentroObj")
         self.radioRotacionarMundo = builder.get_object("radioRotacionarCentroMundo")
+        # switches
+        self.switchAreaClipping = builder.get_object('switchAreaClipping')
+        self.switchLiangBarsky = builder.get_object('switchLiangBarsky')
+
 
         self.btnDeletaItem = builder.get_object("btnDeletaItem")
 
@@ -305,6 +347,9 @@ class MainWindow(Gtk.Window):
         self.buttonSalvarEdicao.connect("clicked", self.on_btn_salvar_edicao_clicked)
         self.buttonCancelarEdicao.connect("clicked", self.on_btn_cancelar_edicao_clicked)
 
+        self.switchAreaClipping.connect('notify::active', self.on_switch_activate_clipping)
+        self.switchLiangBarsky.connect('notify::active', self.on_switch_activate_liang)
+
         self.DrawingFrame.connect('draw', draw_cb)
         self.DrawingFrame.connect('configure-event', configure_event_cb)
 
@@ -313,6 +358,22 @@ class MainWindow(Gtk.Window):
         # exibe tela inicial SGI
         MainWindow.show_all()
         Gtk.main()
+
+    def on_switch_activate_clipping(self, switch, gparam):
+        global area_clipping
+        if switch.get_active():
+            area_clipping = True
+            desenha_area_clippling()
+        else:
+            area_clipping = False
+            desenha_area_clippling()
+
+    def on_switch_activate_liang(self, switch, gparam):
+        global liang_barsky
+        if switch.get_active():
+            liang_barsky = True
+        else:
+            liang_barsky = False
 
     def on_editable_toggled(self, button):
         value = button.get_active()
@@ -387,8 +448,8 @@ class MainWindow(Gtk.Window):
         self.RetaWindow.show_all()
 
     def onBtnSalvarPontoClicked(self, button):
-        x = self.btnSpinX.get_value_as_int()
-        y = self.btnSpinY.get_value_as_int()
+        x = float(self.btnSpinX.get_value_as_int())
+        y = float(self.btnSpinY.get_value_as_int())
         nome = self.textFieldNome.get_text()
         ponto = Ponto(x, y, nome)
         store.append(ponto.get_attributes())
@@ -401,10 +462,10 @@ class MainWindow(Gtk.Window):
 
     def onBtnSalvarRetaClicked(self, button):
         print('teste')
-        x1 = self.spinRetaX1.get_value_as_int()
-        y1 = self.spinRetaY1.get_value_as_int()
-        x2 = self.spinRetaX2.get_value_as_int()
-        y2 = self.spinRetaY2.get_value_as_int()
+        x1 = float(self.spinRetaX1.get_value_as_int())
+        y1 = float(self.spinRetaY1.get_value_as_int())
+        x2 = float(self.spinRetaX2.get_value_as_int())
+        y2 = float(self.spinRetaY2.get_value_as_int())
         nome = self.textFieldRetaNome.get_text()
         reta = Reta(x1, y1, x2, y2, nome)
         store.append(reta.get_sttributes())
@@ -419,8 +480,8 @@ class MainWindow(Gtk.Window):
         self.PoligonoWindow.show_all()
 
     def onBtnAdicionaPontoPoligonoClicked(self, button):
-        x = self.poligonoX.get_value_as_int()
-        y = self.poligonoY.get_value_as_int()
+        x = float(self.poligonoX.get_value_as_int())
+        y = float(self.poligonoY.get_value_as_int())
         p = Ponto(x, y)
         lista_ponto_poligono.append(p)
 
@@ -681,8 +742,8 @@ class MainWindow(Gtk.Window):
         atualizarTela()
 
     def transladar_ponto(self, ponto):
-        x = int(self.textFieldEditarX.get_text())
-        y = int(self.textFieldEditarY.get_text())
+        x = float(self.textFieldEditarX.get_text())
+        y = float(self.textFieldEditarY.get_text())
 
         ponto.x = ponto.x + x
         ponto.y = ponto.y + y
@@ -694,8 +755,8 @@ class MainWindow(Gtk.Window):
         atualizarTela()
 
     def translatar_reta(self, reta):
-        x = int(self.textFieldEditarX.get_text())
-        y = int(self.textFieldEditarY.get_text())
+        x = float(self.textFieldEditarX.get_text())
+        y = float(self.textFieldEditarY.get_text())
 
         reta.x1 = reta.x1 + x
         reta.x2 = reta.x2 + x
@@ -709,8 +770,8 @@ class MainWindow(Gtk.Window):
         atualizarTela()
 
     def transladar_poligono(self, poligono):
-        x = int(self.textFieldEditarX.get_text())
-        y = int(self.textFieldEditarY.get_text())
+        x = float(self.textFieldEditarX.get_text())
+        y = float(self.textFieldEditarY.get_text())
 
         for p in poligono.pontos:
             p.x = p.x + x
