@@ -277,7 +277,6 @@ class Clipping:
             code |= self.LEFT
         if x > x_max:
             code |= self.RIGHT
-
         if y < y_min:
             code |= self.BOTTOM
         if y > y_max:
@@ -324,19 +323,34 @@ class Clipping:
                     y = y_min
 
                 if _code & self.RIGHT:
-                    x = reta.y1 + (reta.y2 - reta.y1) * (x_max - reta.x1) / (reta.x2 - reta.x1)
-                    y = x_max
+                    y = reta.y1 + (reta.y2 - reta.y1) * (x_max - reta.x1) / (reta.x2 - reta.x1)
+                    x = x_max
 
                 if _code & self.LEFT:
-                    x = reta.y1 + (reta.y2 - reta.y1) * (x_min - reta.x1) / (reta.x2 - reta.x1)
-                    y = x_min
+                    y = reta.y1 + (reta.y2 - reta.y1) * (x_min - reta.x1) / (reta.x2 - reta.x1)
+                    x = x_min
 
                 if _code == code_0:
                     reta.x1 = x
                     reta.y1 = y
 
                     code_0 = self.buscar_codigo(reta.x1, reta.y1)
+                else:
+                    reta.x2 = x
+                    reta.y2 = y
 
-                
+                    code_1 = self.buscar_codigo(reta.x2, reta.y2)
+
+        if aceita:
+            pontos = []
+            pontos.append(reta.x1)
+            pontos.append(reta.y1)
+            pontos.append(reta.x2)
+            pontos.append(reta.y2)
+
+            return pontos
+        else:
+            return []
+
 
 

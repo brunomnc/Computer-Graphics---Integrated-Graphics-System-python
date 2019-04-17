@@ -85,10 +85,45 @@ def desenhaPonto(ponto):
     ctx.save()
     ctx.set_line_width(2)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-    ctx.move_to(transformadaViewPortCoordenadaX(ponto.x), transformadaViewPortCoordenadaY(ponto.y))
-    ctx.line_to(transformadaViewPortCoordenadaX(ponto.x), transformadaViewPortCoordenadaY(ponto.y))
-    ctx.stroke()
-    ctx.restore()
+    if liang_barsky == True:
+        clipped = deepcopy(ponto)
+        reta = Reta(clipped.x, clipped.y, clipped.x, clipped.y)
+        lb = Clipping(tela)
+        pontos = lb.liang_barsky_clipping(reta)
+        if len(pontos) == 0:
+            pass
+        else:
+            reta.x1 = pontos[0]
+            reta.y1 = pontos[1]
+            reta.x2 = pontos[2]
+            reta.y2 = pontos[3]
+            ctx.move_to(transformadaViewPortCoordenadaX(reta.x1), transformadaViewPortCoordenadaY(reta.y1))
+            ctx.line_to(transformadaViewPortCoordenadaX(reta.x2), transformadaViewPortCoordenadaY(reta.y2))
+            ctx.stroke()
+            ctx.restore()
+            return
+    if cohen_sutherland == True:
+        clipped = deepcopy(ponto)
+        reta = Reta(clipped.x, clipped.y, clipped.x, clipped.y)
+        lb = Clipping(tela)
+        pontos = lb.cohen_sutherland_clipping(reta)
+        if len(pontos) == 0:
+            pass
+        else:
+            reta.x1 = pontos[0]
+            reta.y1 = pontos[1]
+            reta.x2 = pontos[2]
+            reta.y2 = pontos[3]
+            ctx.move_to(transformadaViewPortCoordenadaX(reta.x1), transformadaViewPortCoordenadaY(reta.y1))
+            ctx.line_to(transformadaViewPortCoordenadaX(reta.x2), transformadaViewPortCoordenadaY(reta.y2))
+            ctx.stroke()
+            ctx.restore()
+            return
+    else:
+        ctx.move_to(transformadaViewPortCoordenadaX(ponto.x), transformadaViewPortCoordenadaY(ponto.y))
+        ctx.line_to(transformadaViewPortCoordenadaX(ponto.x), transformadaViewPortCoordenadaY(ponto.y))
+        ctx.stroke()
+        ctx.restore()
 
 
 def desenhaReta(reta):
@@ -111,6 +146,23 @@ def desenhaReta(reta):
             ctx.line_to(transformadaViewPortCoordenadaX(clipped.x2), transformadaViewPortCoordenadaY(clipped.y2))
             ctx.stroke()
             ctx.restore()
+            return
+    if cohen_sutherland == True:
+        clipped = deepcopy(reta)
+        lb = Clipping(tela)
+        pontos = lb.cohen_sutherland_clipping(clipped)
+        if len(pontos) == 0:
+            pass
+        else:
+            clipped.x1 = pontos[0]
+            clipped.y1 = pontos[1]
+            clipped.x2 = pontos[2]
+            clipped.y2 = pontos[3]
+            ctx.move_to(transformadaViewPortCoordenadaX(clipped.x1), transformadaViewPortCoordenadaY(clipped.y1))
+            ctx.line_to(transformadaViewPortCoordenadaX(clipped.x2), transformadaViewPortCoordenadaY(clipped.y2))
+            ctx.stroke()
+            ctx.restore()
+            return
     else:
         ctx.move_to(transformadaViewPortCoordenadaX(reta.x1), transformadaViewPortCoordenadaY(reta.y1))
         ctx.line_to(transformadaViewPortCoordenadaX(reta.x2), transformadaViewPortCoordenadaY(reta.y2))
@@ -291,6 +343,7 @@ class MainWindow(Gtk.Window):
         # switches
         self.switchAreaClipping = builder.get_object('switchAreaClipping')
         self.switchLiangBarsky = builder.get_object('switchLiangBarsky')
+        self.switchCohen = builder.get_object('switchCohen')
         self.switchHodgmann = builder.get_object('switchHodgmann')
 
 
@@ -375,6 +428,7 @@ class MainWindow(Gtk.Window):
 
         self.switchAreaClipping.connect('notify::active', self.on_switch_activate_clipping)
         self.switchLiangBarsky.connect('notify::active', self.on_switch_activate_liang)
+        self.switchCohen.connect('notify::active', self.on_switch_activate_cohen)
         self.switchHodgmann.connect('notify::active', self.on_switch_activate_hodgmann)
 
         self.DrawingFrame.connect('draw', draw_cb)
@@ -397,10 +451,23 @@ class MainWindow(Gtk.Window):
 
     def on_switch_activate_liang(self, switch, gparam):
         global liang_barsky
+        global cohen_sutherland
         if switch.get_active():
             liang_barsky = True
+            cohen_sutherland = False
+            self.switchCohen.set_active(False)
         else:
             liang_barsky = False
+
+    def on_switch_activate_cohen(self, switch, gparam):
+        global cohen_sutherland
+        global liang_barsky
+        if switch.get_active():
+            cohen_sutherland = True
+            liang_barsky = False
+            self.switchLiangBarsky.set_active(False)
+        else:
+            cohen_sutherland = False
 
     def on_switch_activate_hodgmann(self, switch, gparam):
         global sutherland_hodgmann
@@ -671,6 +738,7 @@ class MainWindow(Gtk.Window):
     def on_btn_rotaciona_esquerda_clicked(self, button):
         if self.radioRotacionarWindow.get_active() == True:
             self.rotaciona_window_esquerda()
+            return
         if len(store) != 0:
             (model, iter) = self.atual_selecao
             objeto = model[iter]
@@ -694,6 +762,7 @@ class MainWindow(Gtk.Window):
     def on_btn_rotaciona_direita_clicked(self, button):
         if self.radioRotacionarWindow.get_active() == True:
             self.rotaciona_window_direita()
+            return
         if len(store) != 0:
             (model, iter) = self.atual_selecao
             objeto = model[iter]
