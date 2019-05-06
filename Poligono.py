@@ -3,9 +3,10 @@ from typing import List
 
 
 class Poligono:
-    def __init__(self, _pontos: [Ponto], _nome: str = None):
+    def __init__(self, _pontos: [Ponto], _nome: str = None, selected = False):
         self.pontos = _pontos
         self.nome = _nome
+        self.selecionado = selected
 
     def get_attributes(self):
         return str(self), self.nome

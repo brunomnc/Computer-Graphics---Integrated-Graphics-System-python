@@ -9,6 +9,7 @@ from Ponto import Ponto
 from Window import Window
 from Reta import Reta
 from Poligono import Poligono
+from Curva import Curva
 import math
 from Arquivo import Arquivo
 from Clipping import Clipping
@@ -17,7 +18,9 @@ from copy import deepcopy
 listaPontos = []
 listaRetas = []
 lista_poligonos = []
+lista_curvas = []
 lista_ponto_poligono = []
+lista_pontos_curva = []
 
 xViewPortMax = 500
 xViewPortMin = 0
@@ -36,6 +39,7 @@ area_clipping = False
 liang_barsky = False
 cohen_sutherland = False
 sutherland_hodgmann = False
+bezier = False
 
 
 class Handler:
@@ -60,6 +64,7 @@ def atualizarTela():
     redesenha_pontos()
     redesenha_retas()
     redesenha_poligonos()
+    redesenha_curvas()
     desenha_area_clippling()
     # atualiza widget do DrawingFrame
     widget.queue_draw()
@@ -79,12 +84,21 @@ def redesenha_poligonos():
     for poligono in lista_poligonos:
         desenha_poligono(poligono)
 
+def redesenha_curvas():
+    for curva in lista_curvas:
+        desenha_curva(curva)
+
 
 def desenhaPonto(ponto):
     ctx = cairo.Context(surface)
     ctx.save()
     ctx.set_line_width(2)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.set_source_rgb(0.3, 0.3, 0.3)
+
+    if ponto.selecionado == True:
+        ctx.set_source_rgb(0, 1, 0)
+
     if liang_barsky == True:
         clipped = deepcopy(ponto)
         reta = Reta(clipped.x, clipped.y, clipped.x, clipped.y)
@@ -131,6 +145,10 @@ def desenhaReta(reta):
     ctx.save()
     ctx.set_line_width(2)
     ctx.set_line_cap(cairo.LINE_CAP_SQUARE)
+    ctx.set_source_rgb(0.3, 0.3, 0.3)
+
+    if reta.selecionado == True:
+        ctx.set_source_rgb(0, 1, 0)
     if liang_barsky == True:
         clipped = deepcopy(reta)
         lb = Clipping(tela)
@@ -174,6 +192,10 @@ def desenha_poligono(poligono):
     ctx.save()
     ctx.set_line_width(2)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.set_source_rgb(0.3, 0.3, 0.3)
+
+    if poligono.selecionado == True:
+        ctx.set_source_rgb(0, 1, 0)
 
     if sutherland_hodgmann == True:
         clipped = deepcopy(poligono)
@@ -203,6 +225,53 @@ def desenha_poligono(poligono):
             ctx.line_to(transformadaViewPortCoordenadaX(p.x), transformadaViewPortCoordenadaY(p.y))
 
         ctx.line_to(transformadaViewPortCoordenadaX(_ponto.x), transformadaViewPortCoordenadaY(_ponto.y))
+
+        ctx.stroke()
+        ctx.restore()
+
+def desenha_curva(curva):
+    ctx = cairo.Context(surface)
+    ctx.save()
+    ctx.set_line_width(2)
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.set_source_rgb(0.3, 0.3, 0.3)
+
+    if curva.selecionado == True:
+        ctx.set_source_rgb(0, 1, 0)
+
+    if cohen_sutherland == True:
+        clipped = deepcopy(curva)
+        lb = Clipping(tela)
+
+        _pontos = []
+
+        for clip in clipped.pontos_curva:
+            r = Reta(clip.x, clip.y, clip.x, clip.y)
+            pontos_aux = lb.cohen_sutherland_clipping(r)
+            if len(pontos_aux) != 0:
+                p = Ponto(pontos_aux[0], pontos_aux[1])
+                _pontos.append(p)
+
+        if len(_pontos) == 0:
+            pass
+        else:
+            _ponto = _pontos[0]
+
+            ctx.move_to(transformadaViewPortCoordenadaX(_ponto.x), transformadaViewPortCoordenadaY(_ponto.y))
+
+            for p in _pontos:
+                ctx.line_to(transformadaViewPortCoordenadaX(p.x), transformadaViewPortCoordenadaY(p.y))
+
+            ctx.stroke()
+            ctx.restore()
+
+    else:
+        _ponto = curva.pontos_curva[0]
+
+        ctx.move_to(transformadaViewPortCoordenadaX(_ponto.x), transformadaViewPortCoordenadaY(_ponto.y))
+
+        for p in curva.pontos_curva:
+            ctx.line_to(transformadaViewPortCoordenadaX(p.x), transformadaViewPortCoordenadaY(p.y))
 
         ctx.stroke()
         ctx.restore()
@@ -282,6 +351,12 @@ class MainWindow(Gtk.Window):
         #
         # poly = Poligono([p, q, s], 's')
         # lista_poligonos.append(poly)
+        # poly = Poligono([Ponto(50, 50), Ponto(150, 150), Ponto(300, 50), Ponto(400,450), Ponto(450, 1)], 'poly')
+        # lista_poligonos.append(poly)
+        curve_bezier = Curva([Ponto(50, 50), Ponto(150, 150), Ponto(300, 50), Ponto(400,450), Ponto(450, 1)], 'bezier', True)
+        curve = Curva([Ponto(50, 50), Ponto(150, 150), Ponto(300, 50), Ponto(400,450), Ponto(450, 1)], 'normal', False)
+        lista_curvas.append(curve)
+        lista_curvas.append(curve_bezier)
 
         builder = Gtk.Builder()
         builder.add_from_file("view.glade")
@@ -297,6 +372,7 @@ class MainWindow(Gtk.Window):
         self.AlertaWindow = builder.get_object("AlertaWindow")
         self.DrawingFrame = builder.get_object("DrawingFrame")
         self.EditarWindow = builder.get_object("WindowEditarObjeto")
+        self.CurvaWindow = builder.get_object("CurvaWindow")
 
         self.objectTreeView = builder.get_object("objectTreeView")
         self.objectTreeView.set_model(store)
@@ -320,6 +396,8 @@ class MainWindow(Gtk.Window):
         # store.append(q.get_attributes())
         # store.append(r.get_sttributes())
         # store.append(poly.get_attributes())
+        store.append(curve.get_attributes())
+        store.append(curve_bezier.get_attributes())
 
         # botoes janela MainWindow
         self.btnAbrirArquivo = builder.get_object("btnAbrirArquivo")
@@ -327,6 +405,7 @@ class MainWindow(Gtk.Window):
         self.btnPonto = builder.get_object("btnPonto")
         self.btnReta = builder.get_object("btnReta")
         self.btnPoligono = builder.get_object("btnPoligono")
+        self.btnCurva = builder.get_object("btnCurva")
         self.btnUp = builder.get_object("btnUp")
         self.btnDown = builder.get_object("btnDown")
         self.btnLeft = builder.get_object("btnLeft")
@@ -377,6 +456,16 @@ class MainWindow(Gtk.Window):
         self.textFieldPoligonoName = builder.get_object("textFieldPoligonoName")
         self.btnAdicionaPontoPoligono = builder.get_object("btnAdicionaPontoPoligono")
 
+        # botoes janela nova curva
+        self.curvaX = builder.get_object("curvaX")
+        self.curvaY = builder.get_object("curvaY")
+        self.curvaZ = builder.get_object("curvaZ")
+        self.btnSalvarCurva = builder.get_object("btnSalvarCurva")
+        self.btnCancelarCurva = builder.get_object("btnCancelarCurva")
+        self.textFieldCurvaName = builder.get_object("textFieldCurvaName")
+        self.btnAdicionaPontoCurva = builder.get_object("btnAdicionaPontoCurva")
+        self.switchBezier = builder.get_object("switchBezier")
+
         # botoes janela alerta
         self.btnWindowAlerta = builder.get_object("btnWindowAlerta")
         self.mensagemTituloAviso = builder.get_object("mensagemTituloAviso")
@@ -407,10 +496,18 @@ class MainWindow(Gtk.Window):
         self.btnSalvarPoligono.connect("clicked", self.onBtnSalvarPoligonoClicked)
         self.btnCancelarPoligono.connect("clicked", self.onBtnCancelaPoligonoClicked)
 
+        # acao click janela Curva
+        self.btnCurva.connect("clicked", self.on_btn_curva_clicked)
+        self.btnAdicionaPontoCurva.connect("clicked", self.on_btn_adiciona_ponto_curva_clicked)
+        self.btnSalvarCurva.connect("clicked", self.on_btn_salvar_curva_clicked)
+        self.btnCancelarCurva.connect("clicked", self.on_btn_cancela_curva_clicked)
+        self.switchBezier.connect('notify::active', self.on_switch_activate_bezier)
+
         # acao click janela principal
         self.btnAbrirArquivo.connect("clicked", self.on_btn_abrir_arquivo_clicked)
         self.btnSalvarArquivo.connect("clicked", self.on_btn_salvar_arquivo_clicked)
         self.btnDeletaItem.connect("clicked", self.on_btn_deleta_clicked)
+        self.btnLimpaTela.connect("clicked", self.on_btn_limpa_tela_clicked)
         self.btnDown.connect("clicked", self.onBtnDownClicked)
         self.btnUp.connect("clicked", self.onBtnUpClicked)
         self.btnLeft.connect("clicked", self.onBtnLeftClicked)
@@ -476,6 +573,7 @@ class MainWindow(Gtk.Window):
         else:
             sutherland_hodgmann = False
 
+
     def on_editable_toggled(self, button):
         value = button.get_active()
         print(value)
@@ -525,6 +623,10 @@ class MainWindow(Gtk.Window):
                 for p in lista_poligonos:
                     if objeto[1] == p.nome:
                         self.escalonar_poligono(p)
+            if objeto[0] == 'Curva':
+                for p in lista_curvas:
+                    if objeto[1] == p.nome:
+                        self.escalonar_curva(p)
         # transladar
         else:
             if objeto[0] == 'Ponto':
@@ -539,14 +641,66 @@ class MainWindow(Gtk.Window):
                 for p in lista_poligonos:
                     if objeto[1] == p.nome:
                         self.transladar_poligono(p)
+            if objeto[0] == 'Curva':
+                for p in lista_curvas:
+                    if objeto[1] == p.nome:
+                        self.transladar_curva(p)
 
         self.EditarWindow.hide()
 
+    def on_btn_limpa_tela_clicked(self, button):
+        global listaPontos
+        global listaRetas
+        global lista_poligonos
+        global lista_curvas
+        global store
+
+        listaPontos.clear()
+        listaRetas.clear()
+        lista_poligonos.clear()
+        lista_curvas.clear()
+        store.clear()
+
+        atualizarTela()
+
+    # Ações de botões Curva #
+
+    def on_btn_curva_clicked(self, button):
+        self.CurvaWindow.show_all()
+
+    def on_btn_adiciona_ponto_curva_clicked(self, button):
+        global lista_pontos_curva
+        x = float(self.curvaX.get_value_as_int())
+        y = float(self.curvaY.get_value_as_int())
+        p = Ponto(x, y)
+        lista_pontos_curva.append(p)
+
+    def on_btn_salvar_curva_clicked(self, button):
+        global lista_ponto_curva
+        nome = self.textFieldPoligonoName.get_text()
+        curva = Curva(lista_pontos_curva, nome)
+        store.append(curva.get_attributes())
+        lista_curvas.append(curva)
+        desenha_curva(curva)
+        self.CurvaWindow.hide()
+        lista_ponto_curva = []
+
+    def on_btn_cancela_curva_clicked(self, button):
+        self.CurvaWindow.hide()
+
+    def on_switch_activate_bezier(self, switch, gparam):
+        global bezier
+        if switch.get_active():
+            bezier = True
+        else:
+            bezier = False
+
+    ###########################################
+
+    # Ações de botões Ponto #
+
     def onBtnPontoClicked(self, button):
         self.PontoWindow.show_all()
-
-    def onBtnRetaClicked(self, button):
-        self.RetaWindow.show_all()
 
     def onBtnSalvarPontoClicked(self, button):
         x = float(self.btnSpinX.get_value_as_int())
@@ -561,6 +715,12 @@ class MainWindow(Gtk.Window):
     def onBtnCancelaPontoClicked(self, button):
         self.PontoWindow.hide()
 
+    ############################################
+
+    # Ações de botões Reta #
+    def onBtnRetaClicked(self, button):
+        self.RetaWindow.show_all()
+
     def onBtnSalvarRetaClicked(self, button):
         print('teste')
         x1 = float(self.spinRetaX1.get_value_as_int())
@@ -574,13 +734,18 @@ class MainWindow(Gtk.Window):
         desenhaReta(reta)
         self.RetaWindow.hide()
 
+
     def onBtnCancelaRetaClicked(self, button):
         self.RetaWindow.hide()
 
+    #########################################
+
+    # Ações de botões Poligono #
     def onBtnPoligonoClicked(self, button):
         self.PoligonoWindow.show_all()
 
     def onBtnAdicionaPontoPoligonoClicked(self, button):
+        global lista_ponto_poligono
         x = float(self.poligonoX.get_value_as_int())
         y = float(self.poligonoY.get_value_as_int())
         p = Ponto(x, y)
@@ -599,11 +764,15 @@ class MainWindow(Gtk.Window):
     def onBtnCancelaPoligonoClicked(self, button):
         self.PoligonoWindow.hide()
 
+    ############################################
+
+
     def on_btn_deleta_selected(self, selecao):
-        model, treeiter = selecao.get_selected()
-        if treeiter is not None:
-            print("You selected", model[treeiter][0])
-            self.atual_selecao = model, treeiter
+        model, iter = selecao.get_selected()
+        if iter is not None:
+            print("You selected", model[iter][0])
+            self.atual_selecao = model, iter
+            self.highlight_objeto(model[iter])
 
     def on_btn_deleta_clicked(self, button):
         if len(store) != 0:
@@ -614,6 +783,42 @@ class MainWindow(Gtk.Window):
                 store.remove(iter)
         else:
             print("Lista Vazia")
+
+        atualizarTela()
+
+    def highlight_objeto(self, objeto):
+        for p in listaPontos:
+            p.selecionado = False
+        for p in listaRetas:
+            p.selecionado = False
+        for p in lista_poligonos:
+            p.selecionado = False
+        for p in lista_curvas:
+            p.selecionado = False
+
+        if objeto[0] == 'Ponto':
+            for p in listaPontos:
+                p.selecionado = False
+                if objeto[1] == p.nome:
+                    p.selecionado = True
+
+        if objeto[0] == 'Reta':
+            for p in listaRetas:
+                p.selecionado = False
+                if objeto[1] == p.nome:
+                    p.selecionado = True
+
+        if objeto[0] == 'Poligono':
+            for p in lista_poligonos:
+                p.selecionado = False
+                if objeto[1] == p.nome:
+                    p.selecionado = True
+
+        if objeto[0] == 'Curva':
+            for p in lista_curvas:
+                p.selecionado = False
+                if objeto[1] == p.nome:
+                    p.selecionado = True
 
         atualizarTela()
 
@@ -630,6 +835,10 @@ class MainWindow(Gtk.Window):
             for p in lista_poligonos:
                 if objeto[1] == p.nome:
                     lista_poligonos.remove(p)
+        if objeto[0] == 'Curva':
+            for p in lista_curvas:
+                if objeto[1] == p.nome:
+                    lista_curvas.remove(p)
 
     def onBtnDownClicked(self, button):
         xMaximo = tela.getXMax()
@@ -758,6 +967,11 @@ class MainWindow(Gtk.Window):
                     for p in lista_poligonos:
                         if objeto[1] == p.nome:
                             self.rotaciona_poligono(p, 'l')
+                if objeto[0] == 'Curva':
+                    # chama func rotaciona curva
+                    for p in lista_curvas:
+                        if objeto[1] == p.nome:
+                            self.rotaciona_curva(p, 'l')
 
     def on_btn_rotaciona_direita_clicked(self, button):
         if self.radioRotacionarWindow.get_active() == True:
@@ -782,6 +996,11 @@ class MainWindow(Gtk.Window):
                     for p in lista_poligonos:
                         if objeto[1] == p.nome:
                             self.rotaciona_poligono(p, 'r')
+                if objeto[0] == 'Curva':
+                    # chama func rotaciona curva
+                    for p in lista_curvas:
+                        if objeto[1] == p.nome:
+                            self.rotaciona_curva(p, 'r')
 
     def rotaciona_ponto(self, ponto, direcao):
         if direcao == 'l':
@@ -844,6 +1063,25 @@ class MainWindow(Gtk.Window):
 
         atualizarTela()
 
+    def rotaciona_curva(self, curva, direcao):
+        if direcao == 'l':
+            theta = 10 * math.pi / 180
+        if direcao == 'r':
+            theta = - 10 * math.pi / 180
+
+        if self.radioRotacionarObjeto.get_active() == True:
+            x, y = curva.get_centro_gravidade()
+        if self.radioRotacionarMundo.get_active() == True or self.radioRotacionarWindow.get_active() == True:
+            x, y = tela.get_centro()
+
+        for p in curva.pontos_curva:
+            _x = (p.x - x) * math.cos(theta) + (p.y - y) * math.sin(theta) + x
+            _y = (p.x - x) * -math.sin(theta) + (p.y - y) * math.cos(theta) + y
+            p.x = _x
+            p.y = _y
+
+        atualizarTela()
+
     def transladar_ponto(self, ponto):
         x = float(self.textFieldEditarX.get_text())
         y = float(self.textFieldEditarY.get_text())
@@ -886,6 +1124,20 @@ class MainWindow(Gtk.Window):
 
         atualizarTela()
 
+    def transladar_curva(self, curva):
+        x = float(self.textFieldEditarX.get_text())
+        y = float(self.textFieldEditarY.get_text())
+
+        for p in curva.pontos_curva:
+            p.x = p.x + x
+            p.y = p.y + y
+
+        for p in lista_curvas:
+            if p == curva:
+                p = curva
+
+        atualizarTela()
+
     def escalonar_reta(self, reta):
         porcentagem = int(self.textFieldEditarEscalonar.get_text()) / 100
 
@@ -909,6 +1161,17 @@ class MainWindow(Gtk.Window):
 
         atualizarTela()
 
+    def escalonar_curva(self, curva):
+        porcentagem = int(self.textFieldEditarEscalonar.get_text()) / 100
+
+        centro_curva_x, centro_curva_y = curva.get_centro_gravidade()
+
+        for p in curva.pontos_curva:
+            p.x = (p.x - centro_curva_x) * porcentagem + centro_curva_x
+            p.y = (p.y - centro_curva_y) * porcentagem + centro_curva_y
+
+        atualizarTela()
+
     def rotaciona_window_esquerda(self):
         for p in listaPontos:
             self.rotaciona_ponto(p, 'l')
@@ -919,6 +1182,9 @@ class MainWindow(Gtk.Window):
         for y in lista_poligonos:
             self.rotaciona_poligono(y, 'l')
 
+        for y in lista_curvas:
+            self.rotaciona_curva(y, 'l')
+
     def rotaciona_window_direita(self):
         for p in listaPontos:
             self.rotaciona_ponto(p, 'r')
@@ -928,6 +1194,9 @@ class MainWindow(Gtk.Window):
 
         for y in lista_poligonos:
             self.rotaciona_poligono(y, 'r')
+
+        for y in lista_curvas:
+            self.rotaciona_curva(y, 'r')
 
 
 win = MainWindow()

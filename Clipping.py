@@ -91,8 +91,12 @@ class Clipping:
 
         return pontos
 
-    def sutherland_hodgman_clipping(self, poligono):
-        pontos = deepcopy(poligono.pontos)
+    def sutherland_hodgman_clipping(self, objeto):
+        pontos = deepcopy(objeto.pontos)
+
+        if str(objeto) == 'Curva':
+            pontos = deepcopy(objeto.pontos_curva)
+
         _left = self.clip_left(pontos)
         _right = self.clip_right(_left)
         _top = self.clip_top(_right)

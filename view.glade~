@@ -598,6 +598,235 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkWindow" id="CurvaWindow">
+    <property name="name">PoligonoWindow</property>
+    <property name="width_request">400</property>
+    <property name="height_request">300</property>
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Desenhar Polígono</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="default_width">400</property>
+    <property name="default_height">300</property>
+    <property name="deletable">False</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkFixed" id="fixedCurvaWindow">
+        <property name="name">fixedWindowPonto</property>
+        <property name="width_request">32</property>
+        <property name="height_request">32</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkEntry" id="textFieldCurvaName">
+            <property name="width_request">350</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="placeholder_text" translatable="yes">Nome da curva</property>
+          </object>
+          <packing>
+            <property name="x">50</property>
+            <property name="y">240</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="btnCancelarCurva">
+            <property name="label" translatable="yes">Cancelar</property>
+            <property name="width_request">100</property>
+            <property name="height_request">50</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="x">251</property>
+            <property name="y">280</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="btnSalvarCurva">
+            <property name="label" translatable="yes">Salvar</property>
+            <property name="width_request">100</property>
+            <property name="height_request">50</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="x">350</property>
+            <property name="y">280</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="labelPoligonoX1">
+            <property name="width_request">15</property>
+            <property name="height_request">50</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">x:</property>
+          </object>
+          <packing>
+            <property name="x">20</property>
+            <property name="y">100</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="labelPoligonoY1">
+            <property name="width_request">15</property>
+            <property name="height_request">50</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">y:</property>
+          </object>
+          <packing>
+            <property name="x">146</property>
+            <property name="y">100</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="labelPoligonoZ1">
+            <property name="width_request">15</property>
+            <property name="height_request">50</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">z:</property>
+          </object>
+          <packing>
+            <property name="x">271</property>
+            <property name="y">101</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="labelWindowPoligono1">
+            <property name="width_request">100</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Escolha as coordenadas da curva.
+Clique em adicionar ponto para adicionar um
+novo ponto a curva:</property>
+          </object>
+          <packing>
+            <property name="x">35</property>
+            <property name="y">10</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="labelPointNomeCurva">
+            <property name="width_request">100</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Por favor, dê um nome para sua nova curva:</property>
+          </object>
+          <packing>
+            <property name="x">50</property>
+            <property name="y">210</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="curvaZ">
+            <property name="width_request">100</property>
+            <property name="height_request">50</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="text" translatable="yes">0</property>
+            <property name="adjustment">adjustmentCoordZPoligono</property>
+          </object>
+          <packing>
+            <property name="x">285</property>
+            <property name="y">100</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="curvaY">
+            <property name="width_request">100</property>
+            <property name="height_request">50</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="text" translatable="yes">0</property>
+            <property name="adjustment">adjustmentCoordYPoligono</property>
+          </object>
+          <packing>
+            <property name="x">160</property>
+            <property name="y">100</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="curvaX">
+            <property name="width_request">100</property>
+            <property name="height_request">50</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="text" translatable="yes">0</property>
+            <property name="adjustment">adjustmentCoordXPoligono</property>
+          </object>
+          <packing>
+            <property name="x">35</property>
+            <property name="y">100</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="btnAdicionaPontoCurva">
+            <property name="label" translatable="yes">Adicionar ponto a curva</property>
+            <property name="width_request">250</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="x">33</property>
+            <property name="y">160</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkImage" id="imageInfoPoligono1">
+            <property name="width_request">30</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Você precisa adicionar ao menos 1 ponto ao seu polígono.
+Ao criar um polígono com apenas 1 coordenada, ele será desenhado como um ponto.
+Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
+            <property name="stock">gtk-info</property>
+          </object>
+          <packing>
+            <property name="x">380</property>
+            <property name="y">20</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSwitch" id="switchBezier">
+            <property name="width_request">45</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+          </object>
+          <packing>
+            <property name="x">350</property>
+            <property name="y">190</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="width_request">120</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Bezier</property>
+          </object>
+          <packing>
+            <property name="x">311</property>
+            <property name="y">170</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkWindow" id="PoligonoWindow">
     <property name="name">PoligonoWindow</property>
     <property name="width_request">400</property>
@@ -1090,7 +1319,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">60</property>
-            <property name="y">380</property>
+            <property name="y">450</property>
           </packing>
         </child>
         <child>
@@ -1105,7 +1334,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">110</property>
-            <property name="y">430</property>
+            <property name="y">500</property>
           </packing>
         </child>
         <child>
@@ -1121,7 +1350,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">60</property>
-            <property name="y">480</property>
+            <property name="y">550</property>
           </packing>
         </child>
         <child>
@@ -1136,7 +1365,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">430</property>
+            <property name="y">500</property>
           </packing>
         </child>
         <child>
@@ -1168,7 +1397,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">160</property>
-            <property name="y">380</property>
+            <property name="y">450</property>
           </packing>
         </child>
         <child>
@@ -1183,7 +1412,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">380</property>
+            <property name="y">450</property>
           </packing>
         </child>
         <child>
@@ -1200,7 +1429,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">300</property>
+            <property name="y">350</property>
           </packing>
         </child>
         <child>
@@ -1249,7 +1478,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">358</property>
+            <property name="y">425</property>
           </packing>
         </child>
         <child>
@@ -1264,7 +1493,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">60</property>
-            <property name="y">545</property>
+            <property name="y">630</property>
           </packing>
         </child>
         <child>
@@ -1278,7 +1507,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">545</property>
+            <property name="y">630</property>
           </packing>
         </child>
         <child>
@@ -1295,7 +1524,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">330</property>
+            <property name="y">380</property>
           </packing>
         </child>
         <child>
@@ -1308,7 +1537,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">528</property>
+            <property name="y">610</property>
           </packing>
         </child>
         <child>
@@ -1324,7 +1553,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">110</property>
-            <property name="y">550</property>
+            <property name="y">610</property>
           </packing>
         </child>
         <child>
@@ -1341,7 +1570,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">110</property>
-            <property name="y">570</property>
+            <property name="y">635</property>
           </packing>
         </child>
         <child>
@@ -1386,7 +1615,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">110</property>
-            <property name="y">583</property>
+            <property name="y">650</property>
           </packing>
         </child>
         <child>
@@ -1490,17 +1719,20 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </packing>
         </child>
         <child>
-          <object class="GtkButton">
-            <property name="label" translatable="yes">button</property>
-            <property name="width_request">100</property>
-            <property name="height_request">80</property>
+          <object class="GtkButton" id="btnCurva">
+            <property name="label" translatable="yes">Desenhar Curva</property>
+            <property name="width_request">200</property>
+            <property name="height_request">30</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Abre a caixa de construção de curvas</property>
+            <property name="image_position">right</property>
+            <property name="always_show_image">True</property>
           </object>
           <packing>
-            <property name="x">320</property>
-            <property name="y">505</property>
+            <property name="x">10</property>
+            <property name="y">300</property>
           </packing>
         </child>
       </object>
