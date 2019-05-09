@@ -1,5 +1,4 @@
 from Ponto import Ponto
-from typing import List
 from math import fabs, pow
 
 

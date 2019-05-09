@@ -1,9 +1,12 @@
+from numpy import array
+
 class Reta:
     def __init__(self, _x1, _y1, _x2, _y2, _nome=None, selected = False):
         self.x1 = _x1
         self.y1 = _y1
         self.x2 = _x2
         self.y2 = _y2
+        self.m = self.to_matrix()
         self.nome = _nome
         self.selecionado = selected
 
@@ -21,5 +24,12 @@ class Reta:
             return True
         else:
             return False
+
+    def to_matrix(self):
+        m = array([[self.x1, self.x2, 0],
+               [self.y1, self.y2, 0],
+               [0,0,1]])
+        print(m)
+        return m
 
 

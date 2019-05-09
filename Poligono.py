@@ -1,12 +1,13 @@
 from Ponto import Ponto
-from typing import List
+from numpy import array, append
 
 
 class Poligono:
-    def __init__(self, _pontos: [Ponto], _nome: str = None, selected = False):
+    def __init__(self, _pontos: [Ponto], _nome: str = None, selected=False):
         self.pontos = _pontos
         self.nome = _nome
         self.selecionado = selected
+        self.m = self.to_matrix()
 
     def get_attributes(self):
         return str(self), self.nome
@@ -36,3 +37,17 @@ class Poligono:
         else:
             return False
 
+    def to_matrix(self):
+        m = array([])
+        sz = len(self.pontos)
+        if sz == 0:
+            return
+
+        for p in range(sz - 1):
+            m = append(m, [[self.pontos[p].x, self.pontos[p].y, 0]])
+
+        m = append(m, [[self.pontos[sz - 1].x, self.pontos[sz - 1].y, 1]])
+
+        print(m)
+
+        return m

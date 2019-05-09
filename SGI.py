@@ -15,8 +15,8 @@ from Arquivo import Arquivo
 from Clipping import Clipping
 from copy import deepcopy
 
-listaPontos = []
-listaRetas = []
+lista_pontos = []
+lista_retas = []
 lista_poligonos = []
 lista_curvas = []
 lista_ponto_poligono = []
@@ -71,12 +71,12 @@ def atualizarTela():
 
 
 def redesenha_pontos():
-    for ponto in listaPontos:
+    for ponto in lista_pontos:
         desenhaPonto(ponto)
 
 
 def redesenha_retas():
-    for reta in listaRetas:
+    for reta in lista_retas:
         desenhaReta(reta)
 
 
@@ -97,6 +97,7 @@ def desenhaPonto(ponto):
     ctx.set_source_rgb(0.3, 0.3, 0.3)
 
     if ponto.selecionado == True:
+        ctx.set_line_width(4)
         ctx.set_source_rgb(0, 1, 0)
 
     if liang_barsky == True:
@@ -584,17 +585,17 @@ class MainWindow(Gtk.Window):
     def on_btn_abrir_arquivo_clicked(self, button):
         arquivo = Arquivo('teste')
         global lista_poligonos
-        global listaPontos
-        global listaRetas
+        global lista_pontos
+        global lista_retas
         lista_objetos = arquivo.abrir()
 
-        listaPontos = lista_objetos[0]
-        listaRetas = lista_objetos[1]
+        lista_pontos = lista_objetos[0]
+        lista_retas = lista_objetos[1]
         lista_poligonos = lista_objetos[2]
 
-        for p in listaPontos:
+        for p in lista_pontos:
             store.append(p.get_attributes())
-        for r in listaRetas:
+        for r in lista_retas:
             store.append(r.get_sttributes())
         for y in lista_poligonos:
             store.append(y.get_attributes())
@@ -602,7 +603,7 @@ class MainWindow(Gtk.Window):
         atualizarTela()
 
     def on_btn_salvar_arquivo_clicked(self, button):
-        arquivo = Arquivo("teste", listaPontos, listaRetas, lista_poligonos)
+        arquivo = Arquivo("teste", lista_pontos, lista_retas, lista_poligonos)
         arquivo.salvar()
 
     def on_btn_salvar_edicao_clicked(self, button):
@@ -612,11 +613,11 @@ class MainWindow(Gtk.Window):
         # escalonar
         if self.radioEscalonar.get_active() == True:
             if objeto[0] == 'Ponto':
-                for p in listaPontos:
+                for p in lista_pontos:
                     if objeto[1] == p.nome:
                         pass
             if objeto[0] == 'Reta':
-                for p in listaRetas:
+                for p in lista_retas:
                     if objeto[1] == p.nome:
                         self.escalonar_reta(p)
             if objeto[0] == 'Poligono':
@@ -630,11 +631,11 @@ class MainWindow(Gtk.Window):
         # transladar
         else:
             if objeto[0] == 'Ponto':
-                for p in listaPontos:
+                for p in lista_pontos:
                     if objeto[1] == p.nome:
                         self.transladar_ponto(p)
             if objeto[0] == 'Reta':
-                for p in listaRetas:
+                for p in lista_retas:
                     if objeto[1] == p.nome:
                         self.translatar_reta(p)
             if objeto[0] == 'Poligono':
@@ -649,14 +650,14 @@ class MainWindow(Gtk.Window):
         self.EditarWindow.hide()
 
     def on_btn_limpa_tela_clicked(self, button):
-        global listaPontos
-        global listaRetas
+        global lista_pontos
+        global lista_retas
         global lista_poligonos
         global lista_curvas
         global store
 
-        listaPontos.clear()
-        listaRetas.clear()
+        lista_pontos.clear()
+        lista_retas.clear()
         lista_poligonos.clear()
         lista_curvas.clear()
         store.clear()
@@ -708,7 +709,7 @@ class MainWindow(Gtk.Window):
         nome = self.textFieldNome.get_text()
         ponto = Ponto(x, y, nome)
         store.append(ponto.get_attributes())
-        listaPontos.append(ponto)
+        lista_pontos.append(ponto)
         desenhaPonto(ponto)
         self.PontoWindow.hide()
 
@@ -730,7 +731,7 @@ class MainWindow(Gtk.Window):
         nome = self.textFieldRetaNome.get_text()
         reta = Reta(x1, y1, x2, y2, nome)
         store.append(reta.get_sttributes())
-        listaRetas.append(reta)
+        lista_retas.append(reta)
         desenhaReta(reta)
         self.RetaWindow.hide()
 
@@ -787,9 +788,9 @@ class MainWindow(Gtk.Window):
         atualizarTela()
 
     def highlight_objeto(self, objeto):
-        for p in listaPontos:
+        for p in lista_pontos:
             p.selecionado = False
-        for p in listaRetas:
+        for p in lista_retas:
             p.selecionado = False
         for p in lista_poligonos:
             p.selecionado = False
@@ -797,13 +798,13 @@ class MainWindow(Gtk.Window):
             p.selecionado = False
 
         if objeto[0] == 'Ponto':
-            for p in listaPontos:
+            for p in lista_pontos:
                 p.selecionado = False
                 if objeto[1] == p.nome:
                     p.selecionado = True
 
         if objeto[0] == 'Reta':
-            for p in listaRetas:
+            for p in lista_retas:
                 p.selecionado = False
                 if objeto[1] == p.nome:
                     p.selecionado = True
@@ -824,13 +825,13 @@ class MainWindow(Gtk.Window):
 
     def atualiza_objetos(self, objeto):
         if objeto[0] == 'Ponto':
-            for p in listaPontos:
+            for p in lista_pontos:
                 if objeto[1] == p.nome:
-                    listaPontos.remove(p)
+                    lista_pontos.remove(p)
         if objeto[0] == 'Reta':
-            for p in listaRetas:
+            for p in lista_retas:
                 if objeto[1] == p.nome:
-                    listaRetas.remove(p)
+                    lista_retas.remove(p)
         if objeto[0] == 'Poligono':
             for p in lista_poligonos:
                 if objeto[1] == p.nome:
@@ -954,12 +955,12 @@ class MainWindow(Gtk.Window):
             if objeto is not None:
                 if objeto[0] == 'Ponto':
                     # chama func rotaciona ponto
-                    for p in listaPontos:
+                    for p in lista_pontos:
                         if objeto[1] == p.nome:
                             self.rotaciona_ponto(p, 'l')
                 if objeto[0] == 'Reta':
                     # chama func rotaciona reta
-                    for p in listaRetas:
+                    for p in lista_retas:
                         if objeto[1] == p.nome:
                             self.rotaciona_reta(p, 'l')
                 if objeto[0] == 'Poligono':
@@ -983,12 +984,12 @@ class MainWindow(Gtk.Window):
             if objeto is not None:
                 if objeto[0] == 'Ponto':
                     # chama func rotaciona ponto
-                    for p in listaPontos:
+                    for p in lista_pontos:
                         if objeto[1] == p.nome:
                             self.rotaciona_ponto(p, 'r')
                 if objeto[0] == 'Reta':
                     # chama func rotaciona reta
-                    for p in listaRetas:
+                    for p in lista_retas:
                         if objeto[1] == p.nome:
                             self.rotaciona_reta(p, 'r')
                 if objeto[0] == 'Poligono':
@@ -1089,7 +1090,7 @@ class MainWindow(Gtk.Window):
         ponto.x = ponto.x + x
         ponto.y = ponto.y + y
 
-        for p in listaPontos:
+        for p in lista_pontos:
             if p == ponto:
                 p = ponto
 
@@ -1104,7 +1105,7 @@ class MainWindow(Gtk.Window):
         reta.y1 = reta.y1 + y
         reta.y2 = reta.y2 + y
 
-        for p in listaRetas:
+        for p in lista_retas:
             if p == reta:
                 p = reta
 
@@ -1173,10 +1174,10 @@ class MainWindow(Gtk.Window):
         atualizarTela()
 
     def rotaciona_window_esquerda(self):
-        for p in listaPontos:
+        for p in lista_pontos:
             self.rotaciona_ponto(p, 'l')
 
-        for r in listaRetas:
+        for r in lista_retas:
             self.rotaciona_reta(r, 'l')
 
         for y in lista_poligonos:
@@ -1186,10 +1187,10 @@ class MainWindow(Gtk.Window):
             self.rotaciona_curva(y, 'l')
 
     def rotaciona_window_direita(self):
-        for p in listaPontos:
+        for p in lista_pontos:
             self.rotaciona_ponto(p, 'r')
 
-        for r in listaRetas:
+        for r in lista_retas:
             self.rotaciona_reta(r, 'r')
 
         for y in lista_poligonos:
