@@ -1,4 +1,6 @@
 from numpy import array
+from Ponto import Ponto
+
 
 class Reta:
     def __init__(self, _x1, _y1, _x2, _y2, _nome=None, selected = False):
@@ -6,6 +8,7 @@ class Reta:
         self.y1 = _y1
         self.x2 = _x2
         self.y2 = _y2
+        self.pontos = [Ponto(_x1, _y1), Ponto(_x2, _y2)]
         self.m = self.to_matrix()
         self.nome = _nome
         self.selecionado = selected

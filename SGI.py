@@ -14,6 +14,7 @@ import math
 from Arquivo import Arquivo
 from Clipping import Clipping
 from copy import deepcopy
+import Transformacoes
 
 lista_pontos = []
 lista_retas = []
@@ -637,7 +638,7 @@ class MainWindow(Gtk.Window):
             if objeto[0] == 'Reta':
                 for p in lista_retas:
                     if objeto[1] == p.nome:
-                        self.translatar_reta(p)
+                        self.transladar_reta(p)
             if objeto[0] == 'Poligono':
                 for p in lista_poligonos:
                     if objeto[1] == p.nome:
@@ -1004,22 +1005,12 @@ class MainWindow(Gtk.Window):
                             self.rotaciona_curva(p, 'r')
 
     def rotaciona_ponto(self, ponto, direcao):
-        if direcao == 'l':
-            theta = 10 * math.pi / 180
-        if direcao == 'r':
-            theta = - 10 * math.pi / 180
-
         if self.radioRotacionarObjeto.get_active() == True:
             x, y = ponto.get_centro_gravidade()
         if self.radioRotacionarMundo.get_active() == True or self.radioRotacionarWindow.get_active() == True:
             x, y = tela.get_centro()
 
-        _x = (ponto.x - x) * math.cos(theta) + (ponto.y - y) * math.sin(theta) + x
-        _y = (ponto.x - x) * -math.sin(theta) + (ponto.y - y) * math.cos(theta) + y
-
-        ponto.x = _x
-        ponto.y = _y
-
+        Transformacoes.rotacao([ponto], direcao, x, y)
         atualizarTela()
 
     def rotaciona_reta(self, reta, direcao):
@@ -1046,49 +1037,28 @@ class MainWindow(Gtk.Window):
         atualizarTela()
 
     def rotaciona_poligono(self, poligono, direcao):
-        if direcao == 'l':
-            theta = 10 * math.pi / 180
-        if direcao == 'r':
-            theta = - 10 * math.pi / 180
-
         if self.radioRotacionarObjeto.get_active() == True:
             x, y = poligono.get_centro_gravidade()
         if self.radioRotacionarMundo.get_active() == True or self.radioRotacionarWindow.get_active() == True:
             x, y = tela.get_centro()
 
-        for p in poligono.pontos:
-            _x = (p.x - x) * math.cos(theta) + (p.y - y) * math.sin(theta) + x
-            _y = (p.x - x) * -math.sin(theta) + (p.y - y) * math.cos(theta) + y
-            p.x = _x
-            p.y = _y
-
+        Transformacoes.rotacao(poligono.pontos, direcao, x, y)
         atualizarTela()
 
     def rotaciona_curva(self, curva, direcao):
-        if direcao == 'l':
-            theta = 10 * math.pi / 180
-        if direcao == 'r':
-            theta = - 10 * math.pi / 180
-
         if self.radioRotacionarObjeto.get_active() == True:
             x, y = curva.get_centro_gravidade()
         if self.radioRotacionarMundo.get_active() == True or self.radioRotacionarWindow.get_active() == True:
             x, y = tela.get_centro()
 
-        for p in curva.pontos_curva:
-            _x = (p.x - x) * math.cos(theta) + (p.y - y) * math.sin(theta) + x
-            _y = (p.x - x) * -math.sin(theta) + (p.y - y) * math.cos(theta) + y
-            p.x = _x
-            p.y = _y
-
+        Transformacoes.rotacao(curva.pontos_curva, direcao, x, y)
         atualizarTela()
 
     def transladar_ponto(self, ponto):
         x = float(self.textFieldEditarX.get_text())
         y = float(self.textFieldEditarY.get_text())
 
-        ponto.x = ponto.x + x
-        ponto.y = ponto.y + y
+        Transformacoes.translacao([ponto], x, y)
 
         for p in lista_pontos:
             if p == ponto:
@@ -1096,7 +1066,7 @@ class MainWindow(Gtk.Window):
 
         atualizarTela()
 
-    def translatar_reta(self, reta):
+    def transladar_reta(self, reta):
         x = float(self.textFieldEditarX.get_text())
         y = float(self.textFieldEditarY.get_text())
 
@@ -1115,9 +1085,7 @@ class MainWindow(Gtk.Window):
         x = float(self.textFieldEditarX.get_text())
         y = float(self.textFieldEditarY.get_text())
 
-        for p in poligono.pontos:
-            p.x = p.x + x
-            p.y = p.y + y
+        Transformacoes.translacao(poligono.pontos, x, y)
 
         for p in lista_poligonos:
             if p == poligono:
@@ -1129,9 +1097,7 @@ class MainWindow(Gtk.Window):
         x = float(self.textFieldEditarX.get_text())
         y = float(self.textFieldEditarY.get_text())
 
-        for p in curva.pontos_curva:
-            p.x = p.x + x
-            p.y = p.y + y
+        Transformacoes.translacao(curva.pontos_curva, x, y)
 
         for p in lista_curvas:
             if p == curva:
@@ -1141,6 +1107,7 @@ class MainWindow(Gtk.Window):
 
     def escalonar_reta(self, reta):
         porcentagem = int(self.textFieldEditarEscalonar.get_text()) / 100
+        self.textFieldEditarEscalonar.set_text("")
 
         centro_reta_x, centro_reta_y = reta.get_centro_gravidade()
 
@@ -1153,24 +1120,14 @@ class MainWindow(Gtk.Window):
 
     def escalonar_poligono(self, poligono):
         porcentagem = int(self.textFieldEditarEscalonar.get_text()) / 100
-
         centro_poligono_x, centro_poligono_y = poligono.get_centro_gravidade()
-
-        for p in poligono.pontos:
-            p.x = (p.x - centro_poligono_x) * porcentagem + centro_poligono_x
-            p.y = (p.y - centro_poligono_y) * porcentagem + centro_poligono_y
-
+        Transformacoes.escalonamento(poligono.pontos, porcentagem, centro_poligono_x, centro_poligono_y)
         atualizarTela()
 
     def escalonar_curva(self, curva):
         porcentagem = int(self.textFieldEditarEscalonar.get_text()) / 100
-
         centro_curva_x, centro_curva_y = curva.get_centro_gravidade()
-
-        for p in curva.pontos_curva:
-            p.x = (p.x - centro_curva_x) * porcentagem + centro_curva_x
-            p.y = (p.y - centro_curva_y) * porcentagem + centro_curva_y
-
+        Transformacoes.escalonamento(curva.pontos_curva, porcentagem, centro_curva_x, centro_curva_y)
         atualizarTela()
 
     def rotaciona_window_esquerda(self):
