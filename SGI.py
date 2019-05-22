@@ -10,6 +10,8 @@ from Window import Window
 from Reta import Reta
 from Poligono import Poligono
 from Curva import Curva
+from Ponto3D import Ponto3D
+from Objeto3D import Objeto3D
 import math
 from Arquivo import Arquivo
 from Clipping import Clipping
@@ -22,6 +24,7 @@ lista_poligonos = []
 lista_curvas = []
 lista_ponto_poligono = []
 lista_pontos_curva = []
+lista_objetos_3d = []
 
 xViewPortMax = 500
 xViewPortMin = 0
@@ -66,6 +69,7 @@ def atualizarTela():
     redesenha_retas()
     redesenha_poligonos()
     redesenha_curvas()
+    redesenha_objetos3d()
     desenha_area_clippling()
     # atualiza widget do DrawingFrame
     widget.queue_draw()
@@ -85,9 +89,15 @@ def redesenha_poligonos():
     for poligono in lista_poligonos:
         desenha_poligono(poligono)
 
+
 def redesenha_curvas():
     for curva in lista_curvas:
         desenha_curva(curva)
+
+
+def redesenha_objetos3d():
+    for obj in lista_objetos_3d:
+        desenha_objeto3d(obj)
 
 
 def desenhaPonto(ponto):
@@ -231,6 +241,7 @@ def desenha_poligono(poligono):
         ctx.stroke()
         ctx.restore()
 
+
 def desenha_curva(curva):
     ctx = cairo.Context(surface)
     ctx.save()
@@ -277,6 +288,25 @@ def desenha_curva(curva):
 
         ctx.stroke()
         ctx.restore()
+
+
+def desenha_objeto3d(objeto3d):
+    ctx = cairo.Context(surface)
+    ctx.save()
+    ctx.set_line_width(2)
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.set_source_rgb(0.3, 0.3, 0.3)
+
+    if objeto3d.selecionado == True:
+        ctx.set_source_rgb(0, 1, 0)
+
+    for s in objeto3d.segmentos:
+        ctx.move_to(transformadaViewPortCoordenadaX(s[0].x), transformadaViewPortCoordenadaY(s[0].y))
+        ctx.line_to(transformadaViewPortCoordenadaX(s[1].x), transformadaViewPortCoordenadaY(s[1].y))
+
+    ctx.stroke()
+    ctx.restore()
+
 
 def desenha_area_clippling():
     global area_clipping
@@ -355,10 +385,26 @@ class MainWindow(Gtk.Window):
         # lista_poligonos.append(poly)
         # poly = Poligono([Ponto(50, 50), Ponto(150, 150), Ponto(300, 50), Ponto(400,450), Ponto(450, 1)], 'poly')
         # lista_poligonos.append(poly)
-        curve_bezier = Curva([Ponto(50, 50), Ponto(150, 150), Ponto(300, 50), Ponto(400,450), Ponto(450, 1)], 'bezier', True)
-        curve = Curva([Ponto(50, 50), Ponto(150, 150), Ponto(300, 50), Ponto(400,450), Ponto(450, 1)], 'normal', False)
-        lista_curvas.append(curve)
-        lista_curvas.append(curve_bezier)
+
+        # curve_bezier = Curva([Ponto(50, 50), Ponto(150, 150), Ponto(300, 50), Ponto(400,450), Ponto(450, 1)], 'bezier', True)
+        # curve = Curva([Ponto(50, 50), Ponto(150, 150), Ponto(300, 50), Ponto(400,450), Ponto(450, 1)], 'normal', False)
+        # lista_curvas.append(curve)
+        # lista_curvas.append(curve_bezier)
+
+        segmentosobj = [[Ponto3D(50, 50, 0), Ponto3D(50, 100, 0)],
+                        [Ponto3D(50, 100, 0), Ponto3D(150, 100, 0)],
+                        [Ponto3D(150, 100, 0), Ponto3D(150, 50, 0)],
+                        [Ponto3D(150, 50, 0), Ponto3D(50, 50, 0)],
+                        [Ponto3D(50, 50, 50), Ponto3D(50, 100, 50)],
+                        [Ponto3D(50, 100, 50), Ponto3D(150, 100, 50)],
+                        [Ponto3D(150, 100, 50), Ponto3D(150, 50, 50)],
+                        [Ponto3D(150, 50, 50), Ponto3D(50, 50, 50)],
+                        [Ponto3D(50, 50, 0), Ponto3D(50, 50, 50)],
+                        [Ponto3D(50, 100, 0), Ponto3D(50, 100, 50)],
+                        [Ponto3D(150, 100, 0), Ponto3D(150, 100, 50)],
+                        [Ponto3D(150, 50, 0), Ponto3D(150, 50, 50)]]
+        objeto3d = Objeto3D(segmentosobj, 'primeiro obj 3d')
+        lista_objetos_3d.append(objeto3d)
 
         builder = Gtk.Builder()
         builder.add_from_file("view.glade")
@@ -398,8 +444,9 @@ class MainWindow(Gtk.Window):
         # store.append(q.get_attributes())
         # store.append(r.get_sttributes())
         # store.append(poly.get_attributes())
-        store.append(curve.get_attributes())
-        store.append(curve_bezier.get_attributes())
+        # store.append(curve.get_attributes())
+        # store.append(curve_bezier.get_attributes())
+        store.append(objeto3d.get_attributes())
 
         # botoes janela MainWindow
         self.btnAbrirArquivo = builder.get_object("btnAbrirArquivo")
@@ -629,6 +676,10 @@ class MainWindow(Gtk.Window):
                 for p in lista_curvas:
                     if objeto[1] == p.nome:
                         self.escalonar_curva(p)
+            if objeto[0] == 'Objeto3D':
+                for p in lista_objetos_3d:
+                    if objeto[1] == p.nome:
+                        self.escalonar_objeto_3d(p)
         # transladar
         else:
             if objeto[0] == 'Ponto':
@@ -647,6 +698,10 @@ class MainWindow(Gtk.Window):
                 for p in lista_curvas:
                     if objeto[1] == p.nome:
                         self.transladar_curva(p)
+            if objeto[0] == 'Objeto3D':
+                for p in lista_objetos_3d:
+                    if objeto[1] == p.nome:
+                        self.transladar_objeto_3d(p)
 
         self.EditarWindow.hide()
 
@@ -797,6 +852,8 @@ class MainWindow(Gtk.Window):
             p.selecionado = False
         for p in lista_curvas:
             p.selecionado = False
+        for p in lista_objetos_3d:
+            p.selecionado = False
 
         if objeto[0] == 'Ponto':
             for p in lista_pontos:
@@ -818,6 +875,12 @@ class MainWindow(Gtk.Window):
 
         if objeto[0] == 'Curva':
             for p in lista_curvas:
+                p.selecionado = False
+                if objeto[1] == p.nome:
+                    p.selecionado = True
+
+        if objeto[0] == 'Objeto3D':
+            for p in lista_objetos_3d:
                 p.selecionado = False
                 if objeto[1] == p.nome:
                     p.selecionado = True
@@ -841,6 +904,11 @@ class MainWindow(Gtk.Window):
             for p in lista_curvas:
                 if objeto[1] == p.nome:
                     lista_curvas.remove(p)
+        if objeto[0] == 'Objeto3D':
+            for p in lista_curvas:
+                if objeto[1] == p.nome:
+                    lista_curvas.remove(p)
+
 
     def onBtnDownClicked(self, button):
         xMaximo = tela.getXMax()
@@ -974,6 +1042,11 @@ class MainWindow(Gtk.Window):
                     for p in lista_curvas:
                         if objeto[1] == p.nome:
                             self.rotaciona_curva(p, 'l')
+                if objeto[0] == 'Objeto3D':
+                    # chama func rotaciona obj 3d
+                    for p in lista_objetos_3d:
+                        if objeto[1] == p.nome:
+                            self.rotaciona_objeto_3d(p, 'l')
 
     def on_btn_rotaciona_direita_clicked(self, button):
         if self.radioRotacionarWindow.get_active() == True:
@@ -1003,6 +1076,11 @@ class MainWindow(Gtk.Window):
                     for p in lista_curvas:
                         if objeto[1] == p.nome:
                             self.rotaciona_curva(p, 'r')
+                if objeto[0] == 'Objeto3D':
+                    # chama func rotaciona obj 3d
+                    for p in lista_objetos_3d:
+                        if objeto[1] == p.nome:
+                            self.rotaciona_objeto_3d(p, 'r')
 
     def rotaciona_ponto(self, ponto, direcao):
         if self.radioRotacionarObjeto.get_active() == True:
@@ -1053,6 +1131,24 @@ class MainWindow(Gtk.Window):
 
         Transformacoes.rotacao(curva.pontos_curva, direcao, x, y)
         atualizarTela()
+
+
+    def rotaciona_objeto_3d(self, obj, direcao):
+        if self.radioRotacionarObjeto.get_active() == True:
+            x, y, z = obj.get_centro_gravidade()
+        if self.radioRotacionarMundo.get_active() == True or self.radioRotacionarWindow.get_active() == True:
+            x, y = tela.get_centro()
+            z = 0
+
+        lista_pontos_3d = []
+
+        for segmento in obj.segmentos:
+            lista_pontos_3d.append(segmento[0])
+            lista_pontos_3d.append(segmento[1])
+
+        Transformacoes.rotacao3d(lista_pontos_3d, direcao, x, y, z)
+        atualizarTela()
+
 
     def transladar_ponto(self, ponto):
         x = float(self.textFieldEditarX.get_text())
@@ -1105,6 +1201,24 @@ class MainWindow(Gtk.Window):
 
         atualizarTela()
 
+    def transladar_objeto_3d(self, obj):
+        x = float(self.textFieldEditarX.get_text())
+        y = float(self.textFieldEditarY.get_text())
+        # z = float(self.textFieldEditarZ.get_text())
+
+        lista_pontos_3d = []
+        for segmento in obj.segmentos:
+            lista_pontos_3d.append(segmento[0])
+            lista_pontos_3d.append(segmento[1])
+
+        Transformacoes.translacao3d(lista_pontos_3d, x, y, 0)
+
+        for p in lista_objetos_3d:
+            if p == obj:
+                p = obj
+
+        atualizarTela()
+
     def escalonar_reta(self, reta):
         porcentagem = int(self.textFieldEditarEscalonar.get_text()) / 100
         self.textFieldEditarEscalonar.set_text("")
@@ -1130,6 +1244,16 @@ class MainWindow(Gtk.Window):
         Transformacoes.escalonamento(curva.pontos_curva, porcentagem, centro_curva_x, centro_curva_y)
         atualizarTela()
 
+    def escalonar_objeto_3d(self, obj):
+        porcentagem = int(self.textFieldEditarEscalonar.get_text()) / 100
+        x, y, z = obj.get_centro_gravidade()
+        lista_pontos_3d = []
+        for segmento in obj.segmentos:
+            lista_pontos_3d.append(segmento[0])
+            lista_pontos_3d.append(segmento[1])
+        Transformacoes.escalonamento3d(lista_pontos_3d, porcentagem, x, y, z)
+        atualizarTela()
+
     def rotaciona_window_esquerda(self):
         for p in lista_pontos:
             self.rotaciona_ponto(p, 'l')
@@ -1143,6 +1267,9 @@ class MainWindow(Gtk.Window):
         for y in lista_curvas:
             self.rotaciona_curva(y, 'l')
 
+        for y in lista_objetos_3d:
+            self.rotaciona_objeto_3d(y, 'l')
+
     def rotaciona_window_direita(self):
         for p in lista_pontos:
             self.rotaciona_ponto(p, 'r')
@@ -1155,6 +1282,9 @@ class MainWindow(Gtk.Window):
 
         for y in lista_curvas:
             self.rotaciona_curva(y, 'r')
+
+        for y in lista_objetos_3d:
+            self.rotaciona_objeto_3d(y, 'r')
 
 
 win = MainWindow()

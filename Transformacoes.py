@@ -37,3 +37,53 @@ def transformacao(pontos, matriz_transformacao):
         new_point = np.dot(m, matriz_transformacao)
         ponto.x = new_point.flat[0]
         ponto.y = new_point.flat[1]
+
+
+def translacao3d(pontos3d, tx, ty, tz):
+    matriz_transformacao = np.array([[1, 0, 0, 0],
+                                     [0, 1, 0, 0],
+                                     [0, 0, 1, 0],
+                                     [tx, ty, tz, 1]])
+
+    transformacao3d(pontos3d, matriz_transformacao)
+
+
+def escalonamento3d(pontos, mult, tx, ty, tz):
+    matriz_escala = np.array([[mult, 0, 0, 0], [0, mult, 0, 0], [0, 0, mult, 0], [0, 0, 0, 1]])
+    matriz_centro = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [-tx, -ty, -tz, 1]])
+    matriz_centro_objeto = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [tx, ty, tz, 1]])
+    matriz_transformacao = np.dot(np.dot(matriz_centro, matriz_escala), matriz_centro_objeto)
+
+    transformacao3d(pontos, matriz_transformacao)
+
+
+def rotacao3d(pontos, direcao, tx, ty, tz):
+    if direcao == 'l':
+        theta = 10 * math.pi / 180
+    if direcao == 'r':
+        theta = - 10 * math.pi / 180
+
+    matriz_rotacao = np.array([[math.cos(theta), 0,  -math.sin(theta), 0],
+                               [0, 1, 0, 0],
+                               [math.sin(theta), 0, math.cos(theta), 0],
+                               [0, 0, 0, 1]])
+    matriz_centro = np.array([[1, 0, 0, 0],
+                              [0, 1, 0, 0],
+                              [0, 0, 1, 0],
+                              [-tx, -ty, -tz, 1]])
+    matriz_centro_objeto = np.array([[1, 0, 0, 0],
+                                     [0, 1, 0, 0],
+                                     [0, 0, 1, 0],
+                                     [tx, ty, tz, 1]])
+    matriz_transformacao = np.dot(np.dot(matriz_centro, matriz_rotacao), matriz_centro_objeto)
+
+    transformacao3d(pontos, matriz_transformacao)
+
+
+def transformacao3d(pontos3d, matriz_transformacao):
+    for ponto in pontos3d:
+        m = np.array([ponto.x, ponto.y, ponto.z, 1])
+        new_point = np.dot(m, matriz_transformacao)
+        ponto.x = new_point.flat[0]
+        ponto.y = new_point.flat[1]
+        ponto.z = new_point.flat[2]
