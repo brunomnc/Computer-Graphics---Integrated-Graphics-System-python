@@ -24,6 +24,8 @@ lista_poligonos = []
 lista_curvas = []
 lista_ponto_poligono = []
 lista_pontos_curva = []
+lista_pontos_3d = []
+segmentos_3d = [[]]
 lista_objetos_3d = []
 
 xViewPortMax = 500
@@ -62,6 +64,18 @@ def transformadaViewPortCoordenadaY(y):
 
     return (1 - auxiliar) * (yViewPortMax - yViewPortMin)
 
+def lista_3d_to_matrix():
+    matrix = [[]]
+    size = len(lista_pontos_3d)
+    i = 0
+    while i < size:
+        matrix.append([lista_pontos_3d[i], lista_pontos_3d[i+1]])
+        if i == size - 1:
+            return
+
+        i += 1
+
+    segmentos_3d = matrix
 
 def atualizarTela():
     clear_surface()
@@ -464,6 +478,9 @@ class MainWindow(Gtk.Window):
         self.btnLimpaTela = builder.get_object("btnLimpaTela")
         self.btnRotacionarDireita = builder.get_object("btnRotacionarDireita")
         self.btnRotacionarEsquerda = builder.get_object("btnRotacionarEsquerda")
+        self.btnRotacionarCima = builder.get_object("btnRotacionarCima")
+        self.btnRotacionarBaixo = builder.get_object("btnRotacionarBaixo")
+
         # radio buttons
         self.radioRotacionarWindow = builder.get_object("radioRotacionarWindow")
         self.radioRotacionarObjeto = builder.get_object("radioRotacionarCentroObj")
@@ -567,6 +584,8 @@ class MainWindow(Gtk.Window):
 
         self.btnRotacionarEsquerda.connect("clicked", self.on_btn_rotaciona_esquerda_clicked)
         self.btnRotacionarDireita.connect("clicked", self.on_btn_rotaciona_direita_clicked)
+        self.btnRotacionarCima.connect("clicked", self.on_btn_rotaciona_cima_clicked)
+        self.btnRotacionarBaixo.connect("clicked", self.on_btn_rotaciona_baixo_clicked)
 
         # self.radioRotacionarObjeto.connect("toggled", self.on_editable_toggled)
         self.buttonSalvarEdicao.connect("clicked", self.on_btn_salvar_edicao_clicked)
@@ -805,18 +824,28 @@ class MainWindow(Gtk.Window):
         global lista_ponto_poligono
         x = float(self.poligonoX.get_value_as_int())
         y = float(self.poligonoY.get_value_as_int())
-        p = Ponto(x, y)
-        lista_ponto_poligono.append(p)
+        z = float(self.poligonoZ.get_value_as_int())
+        if z != 0:
+            p = Ponto3D(x, y, z)
+            lista_pontos_3d.append(p)
+        else:
+            p = Ponto(x, y)
+            lista_ponto_poligono.append(p)
 
     def onBtnSalvarPoligonoClicked(self, button):
         global lista_ponto_poligono
+        global lista_pontos_3d
         nome = self.textFieldPoligonoName.get_text()
-        poligono = Poligono(lista_ponto_poligono, nome)
-        store.append(poligono.get_attributes())
-        lista_poligonos.append(poligono)
-        desenha_poligono(poligono)
-        self.PoligonoWindow.hide()
-        lista_ponto_poligono = []
+        if len(lista_pontos_3d) != 0:
+            # obj3D = Objeto3D()
+            lista_3d_to_matrix()
+        else:
+            poligono = Poligono(lista_ponto_poligono, nome)
+            store.append(poligono.get_attributes())
+            lista_poligonos.append(poligono)
+            desenha_poligono(poligono)
+            self.PoligonoWindow.hide()
+            lista_ponto_poligono = []
 
     def onBtnCancelaPoligonoClicked(self, button):
         self.PoligonoWindow.hide()
@@ -1081,6 +1110,28 @@ class MainWindow(Gtk.Window):
                     for p in lista_objetos_3d:
                         if objeto[1] == p.nome:
                             self.rotaciona_objeto_3d(p, 'r')
+
+    def on_btn_rotaciona_cima_clicked(self, button):
+        if len(store) != 0:
+            (model, iter) = self.atual_selecao
+            objeto = model[iter]
+            if objeto is not None:
+                if objeto[0] == 'Objeto3D':
+                    # chama func rotaciona obj 3d
+                    for p in lista_objetos_3d:
+                        if objeto[1] == p.nome:
+                            self.rotaciona_objeto_3d(p, 'u')
+
+    def on_btn_rotaciona_baixo_clicked(self, button):
+        if len(store) != 0:
+            (model, iter) = self.atual_selecao
+            objeto = model[iter]
+            if objeto is not None:
+                if objeto[0] == 'Objeto3D':
+                    # chama func rotaciona obj 3d
+                    for p in lista_objetos_3d:
+                        if objeto[1] == p.nome:
+                            self.rotaciona_objeto_3d(p, 'd')
 
     def rotaciona_ponto(self, ponto, direcao):
         if self.radioRotacionarObjeto.get_active() == True:

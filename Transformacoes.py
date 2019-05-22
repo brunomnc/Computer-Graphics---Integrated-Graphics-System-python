@@ -1,5 +1,6 @@
 import numpy as np
-import math as math
+from numpy.matlib import identity
+from math import sin, cos, pi
 
 
 def translacao(pontos, dx, dy):
@@ -19,11 +20,11 @@ def escalonamento(pontos, mult, dx, dy):
 
 def rotacao(pontos, direcao, dx, dy):
     if direcao == 'l':
-        theta = 10 * math.pi / 180
+        theta = 10 * pi / 180
     if direcao == 'r':
-        theta = - 10 * math.pi / 180
+        theta = - 10 * pi / 180
 
-    matriz_rotacao = np.array([[math.cos(theta), -math.sin(theta), 0], [math.sin(theta), math.cos(theta), 0], [0, 0, 1]])
+    matriz_rotacao = np.array([[cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1]])
     matriz_centro = np.array([[1, 0, 0], [0, 1, 0], [-dx, -dy, 1]])
     matriz_centro_objeto = np.array([[1, 0, 0], [0, 1, 0], [dx, dy, 1]])
     matriz_transformacao = np.dot(np.dot(matriz_centro, matriz_rotacao), matriz_centro_objeto)
@@ -59,23 +60,70 @@ def escalonamento3d(pontos, mult, tx, ty, tz):
 
 def rotacao3d(pontos, direcao, tx, ty, tz):
     if direcao == 'l':
-        theta = 10 * math.pi / 180
+        theta = 10 * pi / 180
+        eixo = 'y'
     if direcao == 'r':
-        theta = - 10 * math.pi / 180
+        theta = - 10 * pi / 180
+        eixo = 'y'
+    if direcao == 'u':
+        theta = 10 * pi / 180
+        eixo = 'x'
+    if direcao == 'd':
+        theta = - 10 * pi / 180
+        eixo = 'x'
 
-    matriz_rotacao = np.array([[math.cos(theta), 0,  -math.sin(theta), 0],
-                               [0, 1, 0, 0],
-                               [math.sin(theta), 0, math.cos(theta), 0],
-                               [0, 0, 0, 1]])
+    identidade = identity(4, dtype=int)
+    matriz_rotacao_x = identidade
+    matriz_rotacao_y = identidade
+    matriz_rotacao_z = identidade
+
     matriz_centro = np.array([[1, 0, 0, 0],
                               [0, 1, 0, 0],
                               [0, 0, 1, 0],
                               [-tx, -ty, -tz, 1]])
+
     matriz_centro_objeto = np.array([[1, 0, 0, 0],
                                      [0, 1, 0, 0],
                                      [0, 0, 1, 0],
                                      [tx, ty, tz, 1]])
-    matriz_transformacao = np.dot(np.dot(matriz_centro, matriz_rotacao), matriz_centro_objeto)
+
+    if eixo == 'y':
+        matriz_rotacao_x = np.array([[1, 0,  0, 0],
+                                   [0, cos(0), sin(0), 0],
+                                   [0, sin(0), cos(0), 0],
+                                   [0, 0, 0, 1]])
+
+        matriz_rotacao_y = np.array([[cos(theta), 0, -sin(theta), 0],
+                                     [0, 1, 0, 0],
+                                     [sin(theta), 0, cos(theta), 0],
+                                     [0, 0, 0, 1]])
+
+        matriz_rotacao_z = np.array([[cos(0),-sin(0), 0, 0],
+                                     [sin(0), cos(0), 0, 0],
+                                     [0, 0, 1, 0],
+                                     [0, 0, 0, 1]])
+
+
+    if eixo == 'x':
+        # matriz_rotacao_x = np.array([[1,          0,          0, 0],
+        #                              [0, cos(theta), sin(theta), 0],
+        #                              [0, sin(theta), cos(theta), 0],
+        #                              [0,          0,          0, 1]])
+
+        # matriz_rotacao_y = np.array([[cos(0), 0, -sin(0), 0],
+        #                              [0, 1, 0, 0],
+        #                              [sin(0), 0, cos(0), 0],
+        #                              [0, 0, 0, 1]])
+
+        matriz_rotacao_z = np.array([[cos(theta),-sin(theta), 0, 0],
+                                     [sin(theta), cos(theta), 0, 0],
+                                     [0, 0, 1, 0],
+                                     [0, 0, 0, 1]])
+
+    matriz_transformacao = matriz_centro @ matriz_rotacao_x @ matriz_rotacao_y @ matriz_rotacao_z @ matriz_centro_objeto
+
+
+    # matriz_transformacao = np.dot(np.dot(matriz_centro, matriz_rotacao_y), matriz_centro_objeto)
 
     transformacao3d(pontos, matriz_transformacao)
 

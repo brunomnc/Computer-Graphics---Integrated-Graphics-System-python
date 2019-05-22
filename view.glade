@@ -1176,6 +1176,16 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-redo</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-undo</property>
+  </object>
   <object class="GtkImage" id="imageButtonBaixo">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1466,7 +1476,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">60</property>
-            <property name="y">630</property>
+            <property name="y">670</property>
           </packing>
         </child>
         <child>
@@ -1480,7 +1490,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           </object>
           <packing>
             <property name="x">10</property>
-            <property name="y">630</property>
+            <property name="y">670</property>
           </packing>
         </child>
         <child>
@@ -1509,8 +1519,8 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
             <property name="label" translatable="yes">Rotação:</property>
           </object>
           <packing>
-            <property name="x">10</property>
-            <property name="y">610</property>
+            <property name="x">5</property>
+            <property name="y">620</property>
           </packing>
         </child>
         <child>
@@ -1706,6 +1716,36 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           <packing>
             <property name="x">10</property>
             <property name="y">300</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="btnRotacionarCima">
+            <property name="width_request">50</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">image1</property>
+            <property name="use_underline">True</property>
+            <property name="image_position">top</property>
+          </object>
+          <packing>
+            <property name="x">35</property>
+            <property name="y">640</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="btnRotacionarBaixo">
+            <property name="width_request">50</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">image2</property>
+          </object>
+          <packing>
+            <property name="x">35</property>
+            <property name="y">720</property>
           </packing>
         </child>
       </object>

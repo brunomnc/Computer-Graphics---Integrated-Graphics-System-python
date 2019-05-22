@@ -16,3 +16,5 @@ class Ponto3D:
 
     def get_centro_gravidade(self):
         return self.x, self.y, self.z
+
+
