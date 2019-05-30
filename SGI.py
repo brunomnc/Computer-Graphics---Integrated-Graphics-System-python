@@ -22,15 +22,15 @@ lista_pontos = []
 lista_retas = []
 lista_poligonos = []
 lista_curvas = []
+lista_objetos_3d = []
+
 lista_ponto_poligono = []
 lista_pontos_curva = []
 lista_pontos_3d = []
-segmentos_3d = [[]]
-lista_objetos_3d = []
 
-xViewPortMax = 500
+xViewPortMax = 800
 xViewPortMin = 0
-yViewPortMax = 500
+yViewPortMax = 600
 yViewPortMin = 0
 
 surface = None
@@ -65,17 +65,19 @@ def transformadaViewPortCoordenadaY(y):
     return (1 - auxiliar) * (yViewPortMax - yViewPortMin)
 
 def lista_3d_to_matrix():
-    matrix = [[]]
+    matrix = []
     size = len(lista_pontos_3d)
-    i = 0
-    while i < size:
-        matrix.append([lista_pontos_3d[i], lista_pontos_3d[i+1]])
-        if i == size - 1:
-            return
 
-        i += 1
+    for i in range(size):
+        l = [lista_pontos_3d[i], lista_pontos_3d[i + 1]]
+        matrix.append(l)
+        if i == size - 2:
+            break
 
-    segmentos_3d = matrix
+    return matrix
+
+
+
 
 def atualizarTela():
     clear_surface()
@@ -332,9 +334,9 @@ def desenha_area_clippling():
         ctx.set_line_cap(cairo.LINE_CAP_ROUND)
 
         ctx.move_to(50, 50)
-        ctx.line_to(50, 450)
-        ctx.line_to(450, 450)
-        ctx.line_to(450, 50)
+        ctx.line_to(50, 550)
+        ctx.line_to(750, 550)
+        ctx.line_to(750, 50)
         ctx.line_to(50, 50)
         ctx.stroke()
         ctx.restore()
@@ -440,9 +442,9 @@ class MainWindow(Gtk.Window):
         self.objectTreeView.set_model(store)
 
         self.objectsCellRenderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn("Nome", self.objectsCellRenderer, text=0)
+        column = Gtk.TreeViewColumn("Tipo", self.objectsCellRenderer, text=0)
         self.objectTreeView.append_column(column)
-        column = Gtk.TreeViewColumn("Tipo", self.objectsCellRenderer, text=1)
+        column = Gtk.TreeViewColumn("Nome", self.objectsCellRenderer, text=1)
         self.objectTreeView.append_column(column)
 
         # regra de selecao de objeto na lista
@@ -596,6 +598,8 @@ class MainWindow(Gtk.Window):
         self.switchCohen.connect('notify::active', self.on_switch_activate_cohen)
         self.switchHodgmann.connect('notify::active', self.on_switch_activate_hodgmann)
 
+        self.btnWindowAlerta.connect("clicked", self.on_btn_alerta_clicked)
+
         self.DrawingFrame.connect('draw', draw_cb)
         self.DrawingFrame.connect('configure-event', configure_event_cb)
 
@@ -604,6 +608,10 @@ class MainWindow(Gtk.Window):
         # exibe tela inicial SGI
         MainWindow.show_all()
         Gtk.main()
+
+    def on_btn_alerta_clicked(self, button):
+        self.AlertaWindow.hide()
+
 
     def on_switch_activate_clipping(self, switch, gparam):
         global area_clipping
@@ -749,17 +757,26 @@ class MainWindow(Gtk.Window):
         x = float(self.curvaX.get_value_as_int())
         y = float(self.curvaY.get_value_as_int())
         p = Ponto(x, y)
-        lista_pontos_curva.append(p)
+        if p in lista_pontos_curva:
+            return 0
+        else:
+            lista_pontos_curva.append(p)
+        self.curvaX.set_value(0)
+        self.curvaY.set_value(0)
 
     def on_btn_salvar_curva_clicked(self, button):
-        global lista_ponto_curva
-        nome = self.textFieldPoligonoName.get_text()
-        curva = Curva(lista_pontos_curva, nome)
-        store.append(curva.get_attributes())
-        lista_curvas.append(curva)
-        desenha_curva(curva)
-        self.CurvaWindow.hide()
-        lista_ponto_curva = []
+        global lista_pontos_curva
+        if len(lista_pontos_curva) < 4:
+            self.mensagemTituloAviso.set_text("É necessário adicionar 4 pontos ou mais para uma curva.")
+            self.AlertaWindow.show()
+        else:
+            nome = self.textFieldPoligonoName.get_text()
+            curva = Curva(lista_pontos_curva, nome)
+            store.append(curva.get_attributes())
+            lista_curvas.append(curva)
+            desenha_curva(curva)
+            self.CurvaWindow.hide()
+            lista_ponto_curva = []
 
     def on_btn_cancela_curva_clicked(self, button):
         self.CurvaWindow.hide()
@@ -822,6 +839,7 @@ class MainWindow(Gtk.Window):
 
     def onBtnAdicionaPontoPoligonoClicked(self, button):
         global lista_ponto_poligono
+        global lista_pontos_3d
         x = float(self.poligonoX.get_value_as_int())
         y = float(self.poligonoY.get_value_as_int())
         z = float(self.poligonoZ.get_value_as_int())
@@ -837,17 +855,22 @@ class MainWindow(Gtk.Window):
         global lista_pontos_3d
         nome = self.textFieldPoligonoName.get_text()
         if len(lista_pontos_3d) != 0:
-            # obj3D = Objeto3D()
-            lista_3d_to_matrix()
+            segmentos = lista_3d_to_matrix()
+            obj3D = Objeto3D(segmentos, nome)
+            store.append(obj3D.get_attributes())
+            lista_objetos_3d.append(obj3D)
+            desenha_objeto3d(obj3D)
+            lista_pontos_3d = []
         else:
             poligono = Poligono(lista_ponto_poligono, nome)
             store.append(poligono.get_attributes())
             lista_poligonos.append(poligono)
             desenha_poligono(poligono)
-            self.PoligonoWindow.hide()
             lista_ponto_poligono = []
+        self.PoligonoWindow.hide()
 
     def onBtnCancelaPoligonoClicked(self, button):
+        lista_ponto_poligono = []
         self.PoligonoWindow.hide()
 
     ############################################

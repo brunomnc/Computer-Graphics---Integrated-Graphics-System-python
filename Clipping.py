@@ -14,7 +14,7 @@ class Clipping:
         self.tela = tela
 
         temp = tela.getXMax() - tela.getXMin()
-        aux = (temp - 500) / 10
+        aux = (temp - 800) / 10
         self.aux = aux + 50
 
     def clipping_ponto(self, x, y):

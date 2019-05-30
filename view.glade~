@@ -21,7 +21,7 @@
         <child>
           <object class="GtkButton" id="btnWindowAlerta">
             <property name="label" translatable="yes">Ok </property>
-            <property name="width_request">100</property>
+            <property name="width_request">152</property>
             <property name="height_request">50</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -30,8 +30,8 @@
             <property name="always_show_image">True</property>
           </object>
           <packing>
-            <property name="x">155</property>
-            <property name="y">89</property>
+            <property name="x">137</property>
+            <property name="y">143</property>
           </packing>
         </child>
         <child>
@@ -44,24 +44,19 @@
             <property name="icon_size">6</property>
           </object>
           <packing>
-            <property name="x">2</property>
-            <property name="y">10</property>
+            <property name="x">1</property>
           </packing>
         </child>
         <child>
           <object class="GtkLabel" id="mensagemTituloAviso">
-            <property name="width_request">100</property>
-            <property name="height_request">50</property>
+            <property name="width_request">345</property>
+            <property name="height_request">65</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">É necessário adicionar pelo menos 1 ponto ao objeto!</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
           </object>
           <packing>
-            <property name="x">82</property>
-            <property name="y">10</property>
+            <property name="x">15</property>
+            <property name="y">50</property>
           </packing>
         </child>
       </object>
@@ -467,9 +462,8 @@ novo ponto a curva:</property>
             <property name="height_request">30</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Você precisa adicionar ao menos 1 ponto ao seu polígono.
-Ao criar um polígono com apenas 1 coordenada, ele será desenhado como um ponto.
-Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
+            <property name="tooltip_text" translatable="yes">Você precisa adicionar ao menos 4 pontos a sua curva.
+</property>
             <property name="stock">gtk-info</property>
           </object>
           <packing>
@@ -1244,6 +1238,19 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
+          <object class="GtkDrawingArea" id="DrawingFrame">
+            <property name="name">DrawingFrame</property>
+            <property name="width_request">800</property>
+            <property name="height_request">600</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="x">350</property>
+            <property name="y">20</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkButton" id="btnPonto">
             <property name="label" translatable="yes">Desenhar Ponto </property>
             <property name="width_request">200</property>
@@ -1404,7 +1411,7 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
         </child>
         <child>
           <object class="GtkScrolledWindow" id="scrolledObjectsList">
-            <property name="width_request">200</property>
+            <property name="width_request">304</property>
             <property name="height_request">143</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>

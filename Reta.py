@@ -32,7 +32,6 @@ class Reta:
         m = array([[self.x1, self.x2, 0],
                [self.y1, self.y2, 0],
                [0,0,1]])
-        print(m)
         return m
 
 
