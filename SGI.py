@@ -46,6 +46,7 @@ liang_barsky = False
 cohen_sutherland = False
 sutherland_hodgmann = False
 bezier = False
+perspectiva  = False
 
 
 class Handler:
@@ -76,8 +77,27 @@ def lista_3d_to_matrix():
 
     return matrix
 
+def segmentos_3d_to_2d(objeto3d):
+    lista_pontos_2d = []
+
+    for segmento in objeto3d.segmentos:
+        p_1 = Ponto(segmento[0].x, segmento[0].y)
+        # p_2 = Ponto(segmento[1].x, segmento[1].y)
 
 
+        is_in = False
+        #
+        # for p in lista_pontos_2d:
+        #     if p_1.x == p.y or p_1.y == p.x or p_2.x == p.y or p_2.y == p.x:
+        #         is_in = True
+
+        if is_in == False:
+            lista_pontos_2d.append(p_1)
+            # lista_pontos_2d.append(p_2)
+
+    lista_pontos_2d.append(Ponto(objeto3d.segmentos[len(objeto3d.segmentos)-1][0].x, objeto3d.segmentos[len(objeto3d.segmentos)-1][0].y))
+
+    return Poligono(lista_pontos_2d)
 
 def atualizarTela():
     clear_surface()
@@ -316,12 +336,46 @@ def desenha_objeto3d(objeto3d):
     if objeto3d.selecionado == True:
         ctx.set_source_rgb(0, 1, 0)
 
-    for s in objeto3d.segmentos:
-        ctx.move_to(transformadaViewPortCoordenadaX(s[0].x), transformadaViewPortCoordenadaY(s[0].y))
-        ctx.line_to(transformadaViewPortCoordenadaX(s[1].x), transformadaViewPortCoordenadaY(s[1].y))
+    if cohen_sutherland == True:
+        lb = Clipping(tela)
 
-    ctx.stroke()
-    ctx.restore()
+        for s in objeto3d.segmentos:
+            r = Reta(s[0].x, s[0].y, s[1].x, s[1].y)
+            pontos = lb.cohen_sutherland_clipping(r)
+
+            if len(pontos) == 0:
+                pass
+            else:
+                _x1 = pontos[0]
+                _y1 = pontos[1]
+                _x2 = pontos[2]
+                _y2 = pontos[3]
+
+                ctx.move_to(transformadaViewPortCoordenadaX(_x1), transformadaViewPortCoordenadaY(_y1))
+                ctx.line_to(transformadaViewPortCoordenadaX(_x2), transformadaViewPortCoordenadaY(_y2))
+
+        ctx.stroke()
+        ctx.restore()
+        return
+    else:
+        obj_perspectiva = deepcopy(objeto3d)
+        lista_pontos_3d = []
+        if perspectiva == True:
+            for segmento in obj_perspectiva.segmentos:
+                lista_pontos_3d.append(segmento[0])
+                lista_pontos_3d.append(segmento[1])
+
+            Transformacoes.perspectiva(lista_pontos_3d, 100)
+
+        for s in obj_perspectiva.segmentos:
+            print(s[0].x, s[0].y)
+            print(s[1].x, s[1].y)
+
+            ctx.move_to(transformadaViewPortCoordenadaX(s[0].x), transformadaViewPortCoordenadaY(s[0].y))
+            ctx.line_to(transformadaViewPortCoordenadaX(s[1].x), transformadaViewPortCoordenadaY(s[1].y))
+
+        ctx.stroke()
+        ctx.restore()
 
 
 def desenha_area_clippling():
@@ -492,6 +546,7 @@ class MainWindow(Gtk.Window):
         self.switchLiangBarsky = builder.get_object('switchLiangBarsky')
         self.switchCohen = builder.get_object('switchCohen')
         self.switchHodgmann = builder.get_object('switchHodgmann')
+        self.switchPerspectiva = builder.get_object('switchPerspectiva')
 
 
         self.btnDeletaItem = builder.get_object("btnDeletaItem")
@@ -597,6 +652,7 @@ class MainWindow(Gtk.Window):
         self.switchLiangBarsky.connect('notify::active', self.on_switch_activate_liang)
         self.switchCohen.connect('notify::active', self.on_switch_activate_cohen)
         self.switchHodgmann.connect('notify::active', self.on_switch_activate_hodgmann)
+        self.switchPerspectiva.connect('notify::active', self.on_switch_activate_perspectiva)
 
         self.btnWindowAlerta.connect("clicked", self.on_btn_alerta_clicked)
 
@@ -642,6 +698,14 @@ class MainWindow(Gtk.Window):
         else:
             cohen_sutherland = False
 
+    def on_switch_activate_perspectiva(self, switch, gparam):
+        global perspectiva
+
+        if switch.get_active():
+            perspectiva = True
+        else:
+            perspectiva = False
+
     def on_switch_activate_hodgmann(self, switch, gparam):
         global sutherland_hodgmann
         if switch.get_active():
@@ -652,30 +716,49 @@ class MainWindow(Gtk.Window):
 
     def on_editable_toggled(self, button):
         value = button.get_active()
-        print(value)
 
     def on_btn_cancelar_edicao_clicked(self, button):
         self.EditarWindow.hide()
 
     def on_btn_abrir_arquivo_clicked(self, button):
-        arquivo = Arquivo('teste')
         global lista_poligonos
         global lista_pontos
         global lista_retas
-        lista_objetos = arquivo.abrir()
+        dialog = Gtk.FileChooserDialog("Please choose a file", None,
+                                       Gtk.FileChooserAction.OPEN,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
 
-        lista_pontos = lista_objetos[0]
-        lista_retas = lista_objetos[1]
-        lista_poligonos = lista_objetos[2]
+        self.add_filters(dialog)
 
-        for p in lista_pontos:
-            store.append(p.get_attributes())
-        for r in lista_retas:
-            store.append(r.get_sttributes())
-        for y in lista_poligonos:
-            store.append(y.get_attributes())
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            print("Open clicked")
+            print("File selected: " + dialog.get_filename())
+            arquivo = Arquivo(dialog.get_filename())
+            lista_objetos = arquivo.abrir()
+            lista_pontos = lista_objetos[0]
+            lista_retas = lista_objetos[1]
+            lista_poligonos = lista_objetos[2]
+
+            for p in lista_pontos:
+                store.append(p.get_attributes())
+            for r in lista_retas:
+                store.append(r.get_sttributes())
+            for y in lista_poligonos:
+                store.append(y.get_attributes())
+        elif response == Gtk.ResponseType.CANCEL:
+            print("Cancel clicked")
+
+        dialog.destroy()
 
         atualizarTela()
+
+    def add_filters(self, dialog):
+        filter_any = Gtk.FileFilter()
+        filter_any.set_name("Any files")
+        filter_any.add_pattern("*")
+        dialog.add_filter(filter_any)
 
     def on_btn_salvar_arquivo_clicked(self, button):
         arquivo = Arquivo("teste", lista_pontos, lista_retas, lista_poligonos)

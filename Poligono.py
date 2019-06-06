@@ -48,6 +48,4 @@ class Poligono:
 
         m = append(m, [[self.pontos[sz - 1].x, self.pontos[sz - 1].y, 1]])
 
-        print(m)
-
         return m

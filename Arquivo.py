@@ -8,6 +8,7 @@ class Arquivo:
     def __init__(self, nome_arquivo, *objetos:None):
         self.nome_arquivo = nome_arquivo
         self.extensao = '.obj'
+        self.extensao = ''
 
         self.objetos_ponto = []
         self.objetos_reta = []

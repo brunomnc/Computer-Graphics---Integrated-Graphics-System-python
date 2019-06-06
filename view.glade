@@ -1743,6 +1743,31 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
             <property name="y">720</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkSwitch" id="switchPerspectiva">
+            <property name="width_request">45</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+          </object>
+          <packing>
+            <property name="x">240</property>
+            <property name="y">450</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="width_request">120</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Perspectiva</property>
+          </object>
+          <packing>
+            <property name="x">205</property>
+            <property name="y">430</property>
+          </packing>
+        </child>
       </object>
     </child>
   </object>

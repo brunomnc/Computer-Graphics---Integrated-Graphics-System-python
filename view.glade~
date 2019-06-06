@@ -903,7 +903,8 @@ novo ponto a curva:</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Escolha as coordenadas do polígono.
 Clique em adicionar ponto para adicionar um
-novo ponto ao polígono:</property>
+novo ponto ao polígono.
+Um poligono com pontos no eixo z é considerado um objeto 3D.</property>
           </object>
           <packing>
             <property name="x">35</property>
@@ -1740,6 +1741,31 @@ Ao criar um polígono com 2 coordenadas, será desenhada uma reta.</property>
           <packing>
             <property name="x">35</property>
             <property name="y">720</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSwitch" id="switchPerspectiva">
+            <property name="width_request">45</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+          </object>
+          <packing>
+            <property name="x">240</property>
+            <property name="y">450</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="width_request">120</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Perspectiva</property>
+          </object>
+          <packing>
+            <property name="x">211</property>
+            <property name="y">430</property>
           </packing>
         </child>
       </object>
